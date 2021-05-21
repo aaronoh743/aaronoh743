@@ -1,5 +1,5 @@
 ---
-title: "R for Data Science and Analytics"
+title: "Aaron Oh"
 site: distill::distill_website
 listing: posts
 ---
