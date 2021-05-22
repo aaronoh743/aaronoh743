@@ -6,14 +6,21 @@
       "description": "Some additional details about the blog",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-22T10:58:48+08:00"
+      "last_modified": "2021-05-22T11:51:37+08:00"
     },
     {
       "path": "index.html",
       "title": "Aaron Oh",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-22T11:26:26+08:00"
+      "last_modified": "2021-05-22T11:51:40+08:00"
+    },
+    {
+      "path": "index_dataviz.html",
+      "title": "DataViz Makeover",
+      "author": [],
+      "contents": "\r\n\r\n\r\n\r\n",
+      "last_modified": "2021-05-22T11:51:43+08:00"
     }
   ],
   "collections": ["posts/posts.json"]

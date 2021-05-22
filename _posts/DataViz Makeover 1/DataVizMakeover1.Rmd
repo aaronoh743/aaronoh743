@@ -24,5 +24,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 # 1. Introduction     
-Data Data
+
+To insert an image.
+![](Image/Original_Visual.jpg)
 
