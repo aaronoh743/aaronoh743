@@ -1,16 +1,18 @@
 ---
-title: "DataViz Makeover 1"
+title: "DataViz Makeover 1 - Merchandise Trade by Region/Market"
 description: |
-  Data visualisation makeover
+  Explore different approaches to design clear data visualisation with Tableau
 author:
   - name: Aaron Oh
     url: https://www.linkedin.com/in/aaronoh743/
-    affiliation: Singapore Management University
-    #affiliation_url: https://example.com/spacelysprokets
+    affiliation: School of Computing and Information Systems, Singapore Management University
+    affiliation_url: https://scis.smu.edu.sg/
 Published Date: 05-22-2021
 output:
   distill::distill_article:
     self_contained: false
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r setup, include=FALSE}
@@ -21,5 +23,6 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
-
+# 1. Introduction     
+Data Data
 

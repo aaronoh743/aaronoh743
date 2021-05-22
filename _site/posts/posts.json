@@ -1,8 +1,8 @@
 [
   {
     "path": "posts/DataViz Makeover 1/",
-    "title": "DataViz Makeover 1",
-    "description": "Data visualisation makeover",
+    "title": "DataViz Makeover 1 - Merchandise Trade by Region/Market",
+    "description": "Explore different approaches to design clear data visualisation with Tableau",
     "author": [
       {
         "name": "Aaron Oh",
@@ -11,10 +11,10 @@
     ],
     "date": "2021-05-22",
     "categories": [],
-    "contents": "\r\n\r\n\r\n\r\n",
+    "contents": "\r\n\r\nContents\r\n1. Introduction\r\n\r\n1. Introduction\r\nData Data\r\n\r\n\r\n\r\n",
     "preview": {},
-    "last_modified": "2021-05-22T11:08:55+08:00",
-    "input_file": {}
+    "last_modified": "2021-05-22T11:42:30+08:00",
+    "input_file": "DataVizMakeover1.knit.md"
   },
   {
     "path": "posts/welcome/",
