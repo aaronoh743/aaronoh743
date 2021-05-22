@@ -1,5 +1,22 @@
 [
   {
+    "path": "posts/DataViz Makeover 1/",
+    "title": "DataViz Makeover 1",
+    "description": "Data visualisation makeover",
+    "author": [
+      {
+        "name": "Aaron Oh",
+        "url": "https://www.linkedin.com/in/aaronoh743/"
+      }
+    ],
+    "date": "2021-05-22",
+    "categories": [],
+    "contents": "\r\n\r\n\r\n\r\n",
+    "preview": {},
+    "last_modified": "2021-05-22T11:08:55+08:00",
+    "input_file": {}
+  },
+  {
     "path": "posts/welcome/",
     "title": "Welcome to R for Data Science and Analytics",
     "description": "Welcome to our new blog, R for Data Science and Analytics. We hope you enjoy \nreading what we have to say!",
@@ -13,7 +30,7 @@
     "categories": [],
     "contents": "\r\n\r\n\r\n\r\n",
     "preview": {},
-    "last_modified": "2021-05-22T00:26:54+08:00",
-    "input_file": "welcome.knit.md"
+    "last_modified": "2021-05-22T09:45:04+08:00",
+    "input_file": {}
   }
 ]
