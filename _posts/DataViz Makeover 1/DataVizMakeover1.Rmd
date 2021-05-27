@@ -67,7 +67,7 @@ c. The legend (measures names) could be placed between the top and bottom row fo
 
 In this section, I will proposed an alternative graphical representation of the data. 
 
-![Figure 1: Proposed Graphical Representation](Image/sketch_1.jpg){width=50%}
+![Figure 1: Proposed Graphical Representation](Image/sketch_1.jpg){width=75%}
 
 ## 4.2. Advatanges of proposed design
 
@@ -94,11 +94,11 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 2. Create a new Tableau Worksheet, and connect to the cleaned excel file.
 
-![Figure 3: Connecting to data source](Image/Clean_1.jpg){width=50%}
+![Figure 3: Connecting to data source](Image/Clean_1.jpg){width=75%}
 
 3. Three tables corresponding to three worksheet is the excel is extracted. 
 
-![Figure 4: Connecting to data source](Image/Clean_2.jpg){width=50%}
+![Figure 4: Connecting to data source](Image/Clean_2.jpg){width=75%}
 
 
 4. Drag T1 into the workplace and the data points will be automatically populated. 
@@ -107,7 +107,7 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 5. Filter the data based on the period (Jan 2019 - Dec 2020)
 
-![Figure 6: Filter out the relevant period](Image/Clean_5.jpg){width=50%}
+![Figure 6: Filter out the relevant period](Image/Clean_5.jpg){width=75%}
 
 6. Pivot the data (except the first column) to get a thinner table suitable for visualisation. I have also renamed the 3 new columns as Period, Imports and Countries respectively. 
 
@@ -115,11 +115,11 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 7. Change the data type of the period from string to date
 
-![Figure 8: Changing the data type](Image/Clean_7.jpg){width=50%}
+![Figure 8: Changing the data type](Image/Clean_7.jpg){width=75%}
 
 8. Extract the table and save it as T1(outputFile)
 
-![Figure 9: Extract the table](Image/Clean_8.jpg){width=75%}
+![Figure 9: Extract the table](Image/Clean_8.jpg){width=100%}
 
 9. Repeat the same process for T2, and save it as T2(outputFile)
 
@@ -137,7 +137,7 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 13. Rename the new fields accordingly. Period (Imports, Exports), Imports, Exports, Countries (Imports, Exports)
 
 14. Click on the join settings. Inner join is used on period and countries of both tables.
-![Figure 12: Inner join](Image/Clean_10.jpg){width=75%}
+![Figure 12: Inner join](Image/Clean_10.jpg){width=100%}
 
 ## 5.3. Creating Visualisations - Imports and Exports
 
@@ -166,7 +166,7 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 21. I will first create a new measure called Net Exports.
 
-![Figure 17: Creating a new measure](Image/Clean_15.jpg){width=50%}
+![Figure 17: Creating a new measure](Image/Clean_15.jpg){width=100%}
 
 22. A pop-up will appear. Key in "[Exports] - [Imports]" in the space provided to derive net exports. 
 
@@ -174,13 +174,13 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 23. Drag dimensions and measures into the respective columns, rows, filters and marks. Note that the period is set to Year, to aggregate the net exports yearly. 
 
-![Figure 19: Creating the plot](Image/Clean_17.jpg){width=50%}
+![Figure 19: Creating the plot](Image/Clean_17.jpg){width=100%}
 
 ## 5.4. Dashboarding - Putting everything together
 
 24. Create new dashboard worksheet, and the individual charts created previously would appear on the left side Tableau. 
 
-![Figure 19: Creating the dashboard](Image/Clean_18.jpg){width=75%}
+![Figure 19: Creating the dashboard](Image/Clean_18.jpg){width=100%}
 
 25. For this dashboard, I have decided to use PowerPoint (1600 x 900) as the size and used the floating method to position the different visualisations. 
 
@@ -188,7 +188,7 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 26. The final layout of the dashboard is shown in Figure 20 below. The dashboard is also published on [Tableau Public](https://public.tableau.com/views/DataVizMakeover1_16220949122280/Dashboard1?:language=en-US&:display_count=n&:origin=viz_share_link).
 
-![Figure 20: Final Dashboard](Image/Clean_21.jpg){width=75%}
+![Figure 20: Final Dashboard](Image/Clean_21.jpg){width=100%}
 
 # 6. Observations
 
