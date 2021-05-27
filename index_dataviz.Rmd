@@ -2,9 +2,6 @@
 title: "DataViz Makeover"
 listing:
   posts:
-    - DataVizMakeover1
+    - 05-28-2021-DataViz Makeover 1
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```

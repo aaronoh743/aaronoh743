@@ -1,7 +1,8 @@
 ---
 title: "About this blog"
 description: |
-  Some additional details about the blog
+  Name: Aaron Oh  
+  Email: aaron.oh.2020@mitb.smu.edu.sg
 ---
 
 ```{r setup, include=FALSE}
