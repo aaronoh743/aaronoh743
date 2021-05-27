@@ -1,5 +1,6 @@
 name: "Aaron Oh"
 title: "Aaron Oh"
+theme: theme.css
 description: |
   R for Data Science and Analytics
 output_dir: "_site"
@@ -10,3 +11,4 @@ navbar:
     - text: "About"
       href: about.html
 output: distill::distill_article
+
