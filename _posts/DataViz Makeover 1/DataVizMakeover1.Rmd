@@ -81,13 +81,13 @@ In this section, I will proposed an alternative graphical representation of the 
 
 # 5. Step-by-step description for the makeover
 
-In this section, I will be providing a step-by-step guide for the makeover in Tableau Prep Builder. I will make use of 2 tables:  
+In this section, I will be providing a step-by-step guide for the makeover in Tableau. I will make use of 2 tables:  
 **T1:** Merchandise Imports By Region/Market, Monthly  
 **T2:** Merchandise Exports By Region/Market, Monthly  
 
 ## 5.1. Data Preparation (I)
 
-1. Remove the rows 1-5 from Excel T1 and T2 to facilitate upload onto Tableau Prep Builder.
+1. Remove the rows 1-5 from Excel T1 and T2 to facilitate upload onto Tableau.
 
 ![Figure 2: Removing unncessary rows from Excel](Image/Dataclean_1.png){width=50%}
 
