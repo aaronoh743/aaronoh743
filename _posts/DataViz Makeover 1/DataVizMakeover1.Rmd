@@ -67,7 +67,7 @@ c. The legend (measures names) could be placed between the top and bottom row fo
 
 In this section, I will proposed an alternative graphical representation of the data. 
 
-![Figure 1: Proposed Graphical Representation](Image/sketch_1.jpg){width=75%}
+![Figure 2: Proposed Graphical Representation](Image/sketch_1.jpg){width=75%}
 
 ## 4.2. Advatanges of proposed design
 
@@ -89,37 +89,37 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 1. Remove the rows 1-5 from Excel T1 and T2 to facilitate upload onto Tableau.
 
-![Figure 2: Removing unncessary rows from Excel](Image/Dataclean_1.png){width=50%}
+![Figure 3: Removing unncessary rows from Excel](Image/Dataclean_1.png){width=50%}
 
 
 2. Create a new Tableau Worksheet, and connect to the cleaned excel file.
 
-![Figure 3: Connecting to data source](Image/Clean_1.jpg){width=75%}
+![Figure 4: Connecting to data source](Image/Clean_1.jpg){width=75%}
 
 3. Three tables corresponding to three worksheet is the excel is extracted. 
 
-![Figure 4: Connecting to data source](Image/Clean_2.jpg){width=75%}
+![Figure 5: Connecting to data source](Image/Clean_2.jpg){width=75%}
 
 
 4. Drag T1 into the workplace and the data points will be automatically populated. 
 
-![Figure 5: Configuring T1 - Imports](Image/Clean_3.jpg){width=75%}
+![Figure 6: Configuring T1 - Imports](Image/Clean_3.jpg){width=75%}
 
 5. Filter the data based on the period (Jan 2019 - Dec 2020)
 
-![Figure 6: Filter out the relevant period](Image/Clean_5.jpg){width=75%}
+![Figure 7: Filter out the relevant period](Image/Clean_5.jpg){width=75%}
 
 6. Pivot the data (except the first column) to get a thinner table suitable for visualisation. I have also renamed the 3 new columns as Period, Imports and Countries respectively. 
 
-![Figure 7: Pivot the table](Image/Clean_6.jpg){width=75%}
+![Figure 8: Pivot the table](Image/Clean_6.jpg){width=75%}
 
 7. Change the data type of the period from string to date
 
-![Figure 8: Changing the data type](Image/Clean_7.jpg){width=75%}
+![Figure 9: Changing the data type](Image/Clean_7.jpg){width=75%}
 
 8. Extract the table and save it as T1(outputFile)
 
-![Figure 9: Extract the table](Image/Clean_8.jpg){width=100%}
+![Figure 10: Extract the table](Image/Clean_8.jpg){width=100%}
 
 9. Repeat the same process for T2, and save it as T2(outputFile)
 
@@ -129,18 +129,18 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 11. Filter the data based on the countries (Hong Kong, China, Taiwan, US, Malaysia and Japan)
 
-![Figure 10: Filter out the relevant countries](Image/Clean_4.jpg){width=100%}
+![Figure 11: Filter out the relevant countries](Image/Clean_4.jpg){width=100%}
 
 12. Toggle to T2(OutputFile) and drag the table into the workspace. This creates a join between the two tables.
 
-![Figure 11: Joining T1 and T2 together](Image/Clean_9.jpg){width=100%}
+![Figure 12: Joining T1 and T2 together](Image/Clean_9.jpg){width=100%}
 13. Rename the new fields accordingly. Period (Imports, Exports), Imports, Exports, Countries (Imports, Exports)
 
 14. Click on the join settings. Inner join is used on period and countries of both tables.
-![Figure 12: Inner join](Image/Clean_10.jpg){width=100%}
+![Figure 13: Inner join](Image/Clean_10.jpg){width=100%}
 
 15. Create a new calculated field to convert imports and exports into billions scale.
-![Figure 13: Customising filter workspace](Image/Clean_22.jpg){width=100%}
+![Figure 14: Customising filter workspace](Image/Clean_22.jpg){width=100%}
 
 
 ## 5.3. Creating Visualisations - Imports and Exports
@@ -149,17 +149,17 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 17. Drag Countries (Imports) into the filters workspace. Select Hong Kong from the filter pop-up. Repeat for Countries (Exports)
 
-![Figure 14: Customising filter workspace](Image/Clean_11.jpg){width=100%}
+![Figure 15: Customising filter workspace](Image/Clean_11.jpg){width=100%}
 
 18. Drag other dimensions and measures into the columns and rows. For show both imports and exports as a single plot, right click on the exports plot and select "Dual Axis".
 
-![Figure 15: Creating the plot](Image/Clean_12.jpg){width=100%}
+![Figure 16: Creating the plot](Image/Clean_12.jpg){width=100%}
 
 19. Next, customisation of the x and y-axis can be done by double clicking on the axis. This ensures consistency in the axis inttervals.
 
-![Figure 16: Customising the y-axis](Image/Clean_13.jpg){width=100%}
+![Figure 17: Customising the y-axis](Image/Clean_13.jpg){width=100%}
 
-![Figure 17: Customising the x-axis](Image/Clean_14.jpg){width=100%}
+![Figure 18: Customising the x-axis](Image/Clean_14.jpg){width=100%}
 
 20. Repeat the same steps for the remaining 5 countries in different worksheets. 
 
@@ -170,39 +170,39 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 22. I will first create a new measure called Net Exports.
 
-![Figure 18: Creating a new measure](Image/Clean_15.jpg){width=100%}
+![Figure 19: Creating a new measure](Image/Clean_15.jpg){width=100%}
 
 23. A pop-up will appear. Key in "[Exports] - [Imports]" in the space provided to derive net exports. 
 
-![Figure 19: Entering formula for Net Exports](Image/Clean_16.jpg){width=50%}
+![Figure 20: Entering formula for Net Exports](Image/Clean_16.jpg){width=50%}
 
 24. Drag dimensions and measures into the respective columns, rows, filters and marks. Note that the period is set to Year, to aggregate the net exports yearly. 
 
-![Figure 20: Creating the plot](Image/Clean_17.jpg){width=100%}
+![Figure 21: Creating the plot](Image/Clean_17.jpg){width=100%}
 25. Next, I have created a line chart to show the percentage of net exports aggregated by year. Similar to step 18, to choose dual-axis for the 2 graphs to overlap. 
 
-![Figure 21: Creating an additional line chart](Image/Clean_23.jpg){width=75%}
+![Figure 22: Creating an additional line chart](Image/Clean_23.jpg){width=75%}
 
 26. Next, I have created 2 more measures, to differentiate between positive net exports (trade surplus) and negative net exports (trade deficit). This is done by creating a new calculated field, and the IF function.
 
-![Figure 22: Creating additional measures for positive and negative differentiation](Image/Clean_24.jpg){width=75%}
+![Figure 23: Creating additional measures for positive and negative differentiation](Image/Clean_24.jpg){width=75%}
 27. Finally, I have annotated the % change in net exports between 2019 and 2020.
 
-![Figure 23: Creating additional measures for positive and negative differentiation](Image/Clean_25.jpg){width=75%}
+![Figure 24: Creating additional measures for positive and negative differentiation](Image/Clean_25.jpg){width=75%}
 
-## 5.4. Dashboarding - Putting everything together
+## 5.5. Dashboarding - Putting everything together
 
 28. Create new dashboard worksheet, and the individual charts created previously would appear on the left side Tableau. 
 
-![Figure 24: Creating the dashboard](Image/Clean_18.jpg){width=100%}
+![Figure 25: Creating the dashboard](Image/Clean_18.jpg){width=100%}
 
 29. For this dashboard, I have decided to use PowerPoint (1600 x 900) as the size and used the floating method to position the different visualisations. 
 
-![Figure 25: Setting the dashboard](Image/Clean_20.jpg){width=75%}
+![Figure 26: Setting the dashboard](Image/Clean_20.jpg){width=75%}
 
 30. The final layout of the dashboard is shown in Figure 20 below. The dashboard is also published on [Tableau Public](https://public.tableau.com/views/DataVizMakeover1_16220949122280/Dashboard1?:language=en-US&:display_count=n&:origin=viz_share_link).
 
-![Figure 26: Final Dashboard](Image/Clean_21.jpg){width=100%}
+![Figure 27s: Final Dashboard](Image/Clean_21.jpg){width=100%}
 
 # 6. Observations
 
