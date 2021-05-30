@@ -1,5 +1,5 @@
 ---
-title: "Aaron Oh"
+title: "Data Visualisation Projects"
 site: distill::distill_website
 listing: posts
 ---

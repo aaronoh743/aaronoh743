@@ -26,7 +26,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 # 1. Introduction
 
-For the first DataViz makeover assignment, I will be looking at Merchandise Trade by Region/Market, with data extracted from the Department of Statistics (DOS), Singapore. I will be looking at the import and export numbers from 6 countries - Hong Kong, Mainland China, Japan, Malaysia, Taiwan, US.  
+For the first DataViz makeover assignment, I will be looking at Merchandise Trade by Region/Market, with data extracted from the Department of Statistics (DOS), Singapore. I will be looking at the import and export numbers from 6 countries - Hong Kong, Mainland China, Japan, Malaysia, Taiwan, United States. 
 
 The data is made available under the sub-section of [Merchandise Trade by Region/Market](https://www.singstat.gov.sg/find-data/search-by-theme/trade-and-investment/merchandise-trade/latest-data).
 
@@ -44,13 +44,13 @@ I will first examine the original visualisation from the data (Figure 1) and cri
 
 a. Chart labels (y-axis) are inconsistent for all six countries. For instance, Hong Kong's exports uses $2M interval while imports uses $200K interval. This gives an inaccurate first impression that imports have exceeded exports for some months.Similarly, by comparing between countries, it seems that Malaysia and Taiwan have similar imports and exports numbers. Upon closer look, it is observed that Malaysia has twice the amount of exports compared to Taiwan. 
 
-b. The period (x-axis) presented in the chart is inconsistent with the title. Japan only had data from 2020, while the remaining countries have data presented from 2019-2021. The chart title showed 2019-2020 instead. Nonetheless, the title was clear in showing the reasons for choosing the top six countries.
+b. Chart labels are presented in millions(M) and thousands(K). Upon closer inspection of the raw dataset, the data is presented in '000, which indicates that the actual trade values are in nominations of billions. 
 
-c. Y-Axis is not properly labeled with units. It could be misinterpreted as trade volume instead of trade amount.X-axis is clear. 
+c. The period (x-axis) presented in the chart is inconsistent with the title. Japan only had data from 2020, while the remaining countries have data presented from 2019-2021. The chart title showed 2019-2020 instead. Nonetheless, the title was clear in showing the reasons for choosing the top six countries.
 
-d. There could be a short paragraph summarising the objectives of the visualisation. This might give the reader a clearer picture. 
+d. Y-Axis is not properly labeled with units. It could be misinterpreted as trade volume instead of trade amount.X-axis is clear. 
 
-e. There could be annotations on the graph to highlight key observations.
+e. There could be a short paragraph summarising the objectives of the visualisation. This might give the reader a clearer picture.
 
 
 ## 3.2. Aesthetics
@@ -59,7 +59,7 @@ a. Area graph may not be the most appropriate chart. Due to the overlapping colo
 
 b. Usage of colours in the chart is consistent, and easy to differentiate. 
 
-c. The legend (measures names) could be placed between the top and bottom row for better visualisations. 
+c. There could be annotations on the graph to highlight key observations and provide a cleaner look to the entire presentation. 
 
 # 4. Proposed Graphical Representation
 
@@ -71,7 +71,7 @@ In this section, I will proposed an alternative graphical representation of the 
 
 ## 4.2. Advatanges of proposed design
 
-1. I have replaced the area graph with a line graph. This will allow better view of the data especially if there are any overlaps. 
+1. I have replaced the area graph with a line graph. This will allow better view of the data especially if there are any overlaps.
 
 2. The y-axis of both imports and exports have the same interval. This will give a more accurate representation when comparing within and across the countries. 
 
@@ -91,21 +91,20 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 ![Figure 3: Removing unncessary rows from Excel](Image/Dataclean_1.png){width=50%}
 
-
 2. Create a new Tableau Worksheet, and connect to the cleaned excel file.
 
 ![Figure 4: Connecting to data source](Image/Clean_1.jpg){width=75%}
 
-3. Three tables corresponding to three worksheet is the excel is extracted. 
+3. Three tables corresponding to three worksheet in the excel file is extracted. 
 
 ![Figure 5: Connecting to data source](Image/Clean_2.jpg){width=75%}
 
 
-4. Drag T1 into the workplace and the data points will be automatically populated. 
+4. Drag T1 into the workspace and the data points will be automatically populated. 
 
 ![Figure 6: Configuring T1 - Imports](Image/Clean_3.jpg){width=75%}
 
-5. Filter the data based on the period (Jan 2019 - Dec 2020)
+5. Filter the data based on the period specified (Jan 2019 - Dec 2020).
 
 ![Figure 7: Filter out the relevant period](Image/Clean_5.jpg){width=75%}
 
@@ -125,9 +124,9 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 ## 5.2. Data Preparation (II)
 
-10. Open a new workbook and import T1(outputFile)
+10. Open a new workbook and import T1(outputFile) and T2(outputFile)
 
-11. Filter the data based on the countries (Hong Kong, China, Taiwan, US, Malaysia and Japan)
+11. We will first process T1(outputFile). Filter the data based on the countries (Hong Kong, China, Taiwan, US, Malaysia and Japan)
 
 ![Figure 11: Filter out the relevant countries](Image/Clean_4.jpg){width=100%}
 
@@ -136,10 +135,10 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 ![Figure 12: Joining T1 and T2 together](Image/Clean_9.jpg){width=100%}
 13. Rename the new fields accordingly. Period (Imports, Exports), Imports, Exports, Countries (Imports, Exports)
 
-14. Click on the join settings. Inner join is used on period and countries of both tables.
-![Figure 13: Inner join](Image/Clean_10.jpg){width=100%}
+14. Click on the join setting. Inner join is used on period and countries of both tables.
+![Figure 13: Inner join](Image/Clean_10.jpg){width=80%}
 
-15. Create a new calculated field to convert imports and exports into billions scale.
+15. Create a new calculated field to convert imports and exports into the billion scale.
 ![Figure 14: Customising filter workspace](Image/Clean_22.jpg){width=100%}
 
 
@@ -155,7 +154,7 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 ![Figure 16: Creating the plot](Image/Clean_12.jpg){width=100%}
 
-19. Next, customisation of the x and y-axis can be done by double clicking on the axis. This ensures consistency in the axis inttervals.
+19. Next, customisation of the x and y-axis can be done by double clicking on the axis. This ensures consistency in the axis intervals.
 
 ![Figure 17: Customising the y-axis](Image/Clean_13.jpg){width=100%}
 
@@ -183,32 +182,35 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 ![Figure 22: Creating an additional line chart](Image/Clean_23.jpg){width=75%}
 
-26. Next, I have created 2 more measures, to differentiate between positive net exports (trade surplus) and negative net exports (trade deficit). This is done by creating a new calculated field, and the IF function.
+26. Next, I have created 2 more measures, to differentiate between positive net exports (trade surplus) and negative net exports (trade deficit). This is done by creating a new calculated field, and the IF function.These new measures will be added to the line graph labels under the marks workspace.
 
 ![Figure 23: Creating additional measures for positive and negative differentiation](Image/Clean_24.jpg){width=75%}
+
+![Figure 24: Replace net exports measure with ](Image/Clean_26.jpg){width=25%}
+
 27. Finally, I have annotated the % change in net exports between 2019 and 2020.
 
-![Figure 24: Creating additional measures for positive and negative differentiation](Image/Clean_25.jpg){width=75%}
+![Figure 25: Creating additional measures for positive and negative differentiation](Image/Clean_25.jpg){width=75%}
 
 ## 5.5. Dashboarding - Putting everything together
 
-28. Create new dashboard worksheet, and the individual charts created previously would appear on the left side Tableau. 
+28. Create new dashboard worksheet, and the individual charts created previously would appear on the left side Tableau Desktop.
 
-![Figure 25: Creating the dashboard](Image/Clean_18.jpg){width=100%}
+![Figure 26: Creating the dashboard](Image/Clean_18.jpg){width=100%}
 
-29. For this dashboard, I have decided to use PowerPoint (1600 x 900) as the size and used the floating method to position the different visualisations. 
+29. For this dashboard, I have decided to use Automatic as the size and used the floating method to position the different visualisations. Tableau will automatically resize depending on the displayed screen. 
 
-![Figure 26: Setting the dashboard](Image/Clean_20.jpg){width=75%}
+![Figure 27: Setting the dashboard](Image/Clean_20.jpg){width=75%}
 
 30. The final layout of the dashboard is shown in Figure 20 below. The dashboard is also published on [Tableau Public](https://public.tableau.com/views/DataVizMakeover1_16220949122280/Dashboard1?:language=en-US&:display_count=n&:origin=viz_share_link).
 
-![Figure 27s: Final Dashboard](Image/Clean_21.jpg){width=100%}
+![Figure 28: Final Dashboard](Image/Clean_21.jpg){width=100%}
 
 # 6. Observations
 
-1. There is an increase in net exports from 2019-2020 from China and United States. Upon closer inspection, it is noted the increase is due to the decreasing imports from these countries, while exports remained relatively stable (some seasonal fluctuations are observed). As Singapore is heavily dependent on imports for many commodities, it might be worth investigating the reasons.
+1. There is an increase in net exports from China and United States between 2019 and 2020. Upon closer inspection, it is noted the increase is due to the decreasing imports from these countries, while exports remained relatively stable (some seasonal fluctuations are observed). As Singapore is heavily dependent on imports for many commodities items, it might be an are of interest for the policy-makers in this area.  
 
-2. There is a decrease in net exports from 2019-2020 from Malaysia and Japan, resulting in a larger proportion of trade deficit. Specifically for Malaysia, there is a dip in imports and exports in Apr 2020, which could account for a higher margin for the deficit. 
+2. There is a decrease in net exports from 2019-2020 from Malaysia and Japan, resulting in a larger proportion of trade deficit. Specifically for Malaysia, there is a dip in imports and exports in Apr 2020, which accounts for a higher margin for the deficit. 
 
-3. Hong Kong records a significant level of trade surplus while Taiwan shows an opposite trend, a trade deficit. This has been rather consistent throughout 2019-2020. With regard to the trade deficit, it would place Singapore at a disadvantage in the long term. However, it could be positioned as an opportunity for Singapore to relook into country-specific strategies to strengthen international trade. 
+3. Hong Kong records a significant level of trade surplus while Taiwan shows an opposite trend, a trade deficit. This has been rather consistent throughout 2019-2020. With regard to this trend, it might not be alarming should there be existing arrangements between Singapore and these countries i.e trade surplus/deficient is a known fact. However, should this be a new trend, it might be a good opportunity for Singapore to relook into country-specific strategies to strengthen international trade.
 
