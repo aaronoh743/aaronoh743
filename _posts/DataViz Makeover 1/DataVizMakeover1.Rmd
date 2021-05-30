@@ -208,9 +208,9 @@ In this section, I will be providing a step-by-step guide for the makeover in Ta
 
 # 6. Observations
 
-1. There is an increase in net exports from China and United States between 2019 and 2020. Upon closer inspection, it is noted the increase is due to the decreasing imports from these countries, while exports remained relatively stable (some seasonal fluctuations are observed). As Singapore is heavily dependent on imports for many commodities items, it might be an are of interest for the policy-makers in this area.  
+1. There is an increase in net exports from China (+175%) and United States (+186%) between 2019 and 2020. Upon closer inspection, it is noted the increase is due to the decreasing imports from these countries, while exports remained relatively stable (some seasonal fluctuations are observed). As Singapore is heavily dependent on imports for many commodities items, it might be an are of interest for the policy-makers in this area.  
 
-2. There is a decrease in net exports from 2019-2020 from Malaysia and Japan, resulting in a larger proportion of trade deficit. Specifically for Malaysia, there is a dip in imports and exports in Apr 2020, which accounts for a higher margin for the deficit. 
+2. There is a decrease in net exports from 2019-2020 from Malaysia (-161%) and Japan (-340%), resulting in a larger proportion of trade deficit. Specifically for Malaysia, there is a dip in imports and exports in Apr 2020, which accounts for a higher margin for the deficit. 
 
 3. Hong Kong records a significant level of trade surplus while Taiwan shows an opposite trend, a trade deficit. This has been rather consistent throughout 2019-2020. With regard to this trend, it might not be alarming should there be existing arrangements between Singapore and these countries i.e trade surplus/deficient is a known fact. However, should this be a new trend, it might be a good opportunity for Singapore to relook into country-specific strategies to strengthen international trade.
 
