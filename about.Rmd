@@ -1,10 +1,13 @@
 ---
-title: "About this blog"
-description: |
-  Name: Aaron Oh  
-  Email: aaron.oh.2020@mitb.smu.edu.sg
+  title: "About this blog"
+  description: This blog documents my submissions as part of ISSS608 Visual Analytics offered by Masters of IT in Business (MITB), Singapore Management University. 
+    
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+Name: [Aaron Oh](https://www.linkedin.com/in/aaronoh743/)
+
+Email: [aaronoh743@gmail.com](aaronoh743@gmail.com)

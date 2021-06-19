@@ -1,0 +1,255 @@
+---
+title: "DataVizMakeover2 - Merchandise Trade by Region/Market"
+description: |
+  Explore different approaches to design clear data visualisation with Tableau.
+  This was created as part of the course requirement for ISSS608 Visual Analytics for MITB.
+author:
+  - name: Aaron Oh
+    url: https://www.linkedin.com/in/aaronoh743/
+    affiliation: School of Computing and Information Systems, Singapore Management University
+    affiliation_url: https://scis.smu.edu.sg/
+    date: 06-20-2021
+output:
+  distill::distill_article:
+    self_contained: false
+    toc: true
+    toc_depth: 2
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# 1. Introduction
+
+For the second DataViz makeover assignment, I will be looking at the same dataset - Merchandise Trade by Region/Market.I will be looking at is between January 2011 - December 2020 and focusing on United States, Mainland China, Malaysia, Japan, Taiwan, Republic of Korea, Thailand, Indonesia, EU and Hong Kong. 
+
+The data is made available under the sub-section of [Merchandise Trade by Region/Market](https://www.singstat.gov.sg/find-data/search-by-theme/trade-and-investment/merchandise-trade/latest-data).
+
+# 2. Objectives
+
+The chart aims to differentiate the regions that are net importers or exporters between 2011 and 2020. It also aims to show the quantum of trade which highlights the trade relationship between Singapore and the regions. 
+
+# 3. Evaluation of the original visualisation
+
+I will first examine the original visualisation from the data (Figure 1) and critique based on the clarity and aesthetics. 
+
+![Figure 1: Original Chart of Net Exports](Image/image1.jpg)
+
+## 3.1. Clarity
+
+a. Some of the bubbles in the chart are overlapping with one another which makes it difficult to determine the net exports for some market/region. For instance, EU, Malaysia and United States are congregating near the boundary line. In addition, the United States bubble is covering the white circle of many markets which is supposed to indicate if they are net importers or net exporters. Some of the labels, indicating the region name and total trade value are also covering the white circle.
+
+b. The size of the bubble is indicative of the total trade volume of the market with Singapore. However, given the size, portion of the bubbles will cross over the boundary line between net imports and exports. This gives an inaccurate impression of the market on whether they are net importers or net exporters. For example, at first glance, Malaysia could be both. Only upon closer inspection of the white centre can we establish the status. 
+
+c. Title and chart description is absent from the visualisation. There should be a title to show the reader what the visualisation is about. It will give better clarity to the user when making sense of the different bubbles within the chart. Without it, the reader would have to make certain assumptions based on the labels present on the chart. 
+
+d. The visualisation gave no context to the insight paragraph provided at the bottom of the page. For the visualisation, we assume that data from 2011-2020 is used. However, the insight paragraph depicted the change in exports between Mainland China and United States from 2009 and 2006 respectively.As such, the paragraph is redundant. 
+
+e. There seems to be a mix of markets and regions in the same chart. European Union (EU) is a region, while the remaining are markets. This gives an imbalanced comparison as a region (make up of multiple markets) would have a larger trade volume. 
+
+
+## 3.2. Aesthetics
+
+a. There are too many colours used to differentiate the regions on the same diagram. This could be distracting to the reader in determining what to focus on. As such, a static graph might not be a good strategy for visualisation. However, the colour differentiation between net imports and exports is good.
+
+b. There are no labels on the x and y axis. At first glance, I am unable to ascertain what the axis are referring to, and at what units. The additional sticker for imports and exports, might also be redundant. 
+
+c. The labels and the axis are inconsistent in the information presented. While both the x and y axis shows the region imports and exports separately, the labels shows the total trade value instead. This does not give any additional information to the reader. 
+
+# 4. Proposed Graphical Representation
+
+## 4.1. Sketch 
+
+In this section, I will proposed an alternative graphical representation of the data.
+
+![Figure: Proposed Graphical Representation](Image/image2.jpg)
+
+
+## 4.2. Advatanges of proposed design
+
+a. I have kept the bubble plot to show the Import/Export relationship between the different markets and regions.
+
+b. I have included multiple filters to allow better visulisation - Net Importers/Net Exporters, Market/Region,ranking and year based on net exports and total trade volume. These interactive filtering features allow users to customise their views and reduce cluttering on the visualisation which might inhibit effective analysis.
+
+c. I have excluded static value plots as it makes the visualisation look busy. Instead, I have included tooltips to each datapoint and will display the relevant data when hovering above the plot. 
+
+d. Clear colour and title distinction between the net importers (blue) and net exporters (green). This will be demonstrated in the later steps.
+
+
+# 5. Step-by-step description for the makeover
+
+In this section, I will be providing a step-by-step guide for the makeover in Tableau Prep Builder and Tableau Desktop. Similar to the first makeover, I will make use of 2 tables:  
+
+**T1:** Merchandise Imports By Region/Market, Monthly  
+**T2:** Merchandise Exports By Region/Market, Monthly  
+
+## 5.1. Data Preparation (Tableau Prep Builder)
+
+1. Remove the rows 1-5 from Excel T1 and T2 to facilitate upload onto Tableau.
+
+![Figure 2: Removing unncessary rows from Excel](Image/Dataclean_1.png){width=75%}
+
+2. Open Tableau Prep Builder. Create a new connection with the raw data. Import the csv file (OutPut.csv) from the source folder. 
+
+![Figure 3: Create a new excel](Image/dataclean2.png){width=75%}
+
+![Figure 4: Import the raw data file](Image/dataclean3.png){width=75%}
+
+3. Drag T1 into the workspace and create a new clean step.
+
+![Figure 5: Dragging T1 into the workspace and creating a new clean step](Image/dataclean4.png){width=75%}
+
+4. In this visualisation, we will only look at data from 2011-2020. As such, I will filter out the months and years that are not applicable in the analysis. I will first click on the "Show List field". Next, I will highlight the relevant columns that not applicable before removing them. 
+
+![Figure 6: Removing unncessary time variable](Image/dataclean5.png){width=75%}
+
+5. Next, I also noticed that there are also some values in the variables column that are unnecessary and will be removed. 
+
+![Figure 7: Removing unncessary rows](Image/dataclean6.png){width=75%}
+
+![Figure 8: Exclude unncessary rows](Image/dataclean7.png){width=75%}
+
+6. Pivot the data (except for the variable column) to get a thinner table suitable for visualisation. Drag the fields into the pivoted fields. Create another clean step after completion to visualise the data. 
+
+![Figure 9: Pivot the data](Image/dataclean8.png){width=75%}
+
+7. Rename the columns to Region/Market, Year Month and Import respectively.I will also change the data type of the columns, to ensure easy filtering and sorting later. Year Month is changed to "Date", while import (cleaned) is change to whole number.
+
+![Figure 10: Rename the columns](Image/dataclean9.png){width=75%}
+
+![Figure 11: Changing the data types of the columns](Image/dataclean10.png){width=75%}
+
+8. Next, I will ensure that the import value is standardised as there are different units in the data set. I will do so by creating a new calculated field, with the following formula.The new column is renamed as Import (Cleaned). The original data can be removed. 
+
+![Figure 12: Create new calculated field to standardise import values](Image/dataclean11.png){width=75%}
+
+9. Next, I will create a separate column called "Region/Market Filter" to distinguish between markets and regions. By observing the raw data, I observed that the markets have "Thousand Dollars" following their market name, while regions have "Million Dollars" following their region name. This can be done with another calculated field with the following formula. 
+
+![Figure 13: Create new calculated field to distinguise between markets and regions](Image/dataclean12.png){width=75%}
+
+10. Next, I would like to remove the additional details from the region/market column to keep only the names. I will do an automatic split and keep only the column with only Region and Market names.Rename the columns accordingly. 
+
+![Figure 14: Post splitting of region/market column](Image/dataclean13.png){width=75%}
+
+11. Repeat Step 1-10 to clean to T2 for exports.
+
+![Figure 15: Two flows for T1 and T2](Image/dataclean14.png){width=75%}
+
+12. An inner join is created between the cleaned data from T1 and T2, with the following condition. This functions mainly ensures that import and export data could be found on the same row, linking by Year Month and regions/markets.
+
+![Figure 16: Inner Join](Image/dataclean15.png){width=75%}
+
+13. For the visualisations, I would like to look at data yearly and is required to aggregate imports and exports values by Year. This can be done by the aggregate function. I will drag region/market, year, region/market filter into the grouped fields while exports(cleaned) and import(cleaned) into the aggegated field. Finally, I will create a clean step to visualise the data again.
+
+![Figure 17: Aggregating data](Image/dataclean39.png){width=75%}
+
+14. Remove the duplicated columns. 5 columns should remain: Region/Market, Region/Market Filter, Year Month, Import (Cleaned) and Export (Cleaned). Finally, output the completed cleaned data into a Tableau Data Extract(.hyper) and run the flow. I will add this file as a connection in Tableau Desktop to build the visualation. We are not ready to move into Tableau Desktop!
+
+![Figure 18: Exporting data](Image/dataclean16.png){width=75%}
+
+## 5.2. Creating Visualisations (Net Exports) - Tableau Desktop
+
+15. First, I will create the net exports visualisation by region/market. A new calculated fields, "Net Exports" is created with the following formula.
+
+![Figure 19: Net Exports field](Image/dataclean17.png){width=75%}
+
+16. Next, I will create a net exporter/net importer filter. This is to allow self-filtering in the dashboard to differentiate between the 2 groups.A new calculated field, can be created for this. 
+
+![Figure 20: Net exporter/importer filter](Image/dataclean18.png){width=75%}
+
+17. I will set-up the basic structure of the visualisation. The cleaned import and export data will be dropped in the columns and rows respectively. To split the bubble plot into different region/market, the region/market dimension is dropped under Detail. I have also dropped the earlier filters created into the filter card.
+
+![Figure 21: Basic structure of the visualisation](Image/dataclean19.png){width=75%}
+
+18. The default value of the filters allow for multiple selection and select all function. For this visualisation, I want the selection to be single value, without all selection to reduce clutter in the chart. Under the filter card, the "Show All Value" should be unchecked and "Single Value (List)" should be picked.
+
+![Figure 22: Customising filter choice](Image/dataclean20.png){width=75%}
+
+19. Next, a new calculated field, "Total Trade Value" is created which will be visualised by the size of the bubble. Total trade volume is created with the formula below. The newly created measure is dropped under "Size" in the workspace.
+
+![Figure 23: Total Trade Volume Visualisation](Image/dataclean21.png){width=75%}
+
+20. Next, it would be very cluttered to all markets/regions on the same graph. As such, I will create a rank filter to limit the number of data point to show. A new calculated field, Ranking by Net Exports, is created with the following formula. The formula is structured such that there are no overlaps in the ranking between net importers and net exporters. 
+
+![Figure 24: Ranking by Net Exports](Image/dataclean22.png){width=75%}
+
+21. I have also duplicated "Ranking by Net Exports" and named it "Ranking by Net Exports (copy)". This is done with the intention to limit the allowable value for the first filter. Drop "Ranking by Net Exports" into the filter card. Select "1" from the list, and click ok. 
+
+![Figure 25: Filtering Ranking by Net Exports](Image/dataclean23.png){width=75%}
+
+22. Next, the ranking should be computed using "Region/Market" and not the default. Display the filter in the right pane, and should be in the form of a slider. However, we do not want to display all 74 values. Step 23 will describe the steps to limit this number.
+
+![Figure 26: Computing ranking by net exports](Image/dataclean24.png){width=75%}
+
+![Figure 27: Ranking by Net Export Filter](Image/dataclean25.png){width=75%}
+
+23. Now, we can move "Ranking by Net Exports (copy) to the filter card. Repeat step 20 and 21 to compute the ranking. However, instead of choosing the full list of values, we will limit to only 15. By doing so, the non-copy filter will only allow to choose the top 15 value. This value can be changed depending on the needs.   
+
+![Figure 28: Limiting range of Rank Filter](Image/dataclean26.png){width=75%}
+
+24. Finally, we will customise the filter to "At Most". This means that only the right hand side of the filter can be moved, with 15 as the maximum. 
+
+![Figure 29: Customising the filter options](Image/dataclean27.png){width=75%}
+
+25. I will customise the interative tooltips to display the relevant text when the user hover over the data point. I will create 2 new calculated fields called "Net Exporter Filter" and "Net Importer Filter'. These fields allow customisable display of whether the region/market is a net importer or net exporter.The newly created filter is dropped under tooltip.
+
+![Figure 30: Net Exporter and Net Importer Filters](Image/dataclean28.png){width=75%}
+
+26. In the same visualisation, I would also like to show the ranking of total volume in the tooltip. First, a new calculated field called Ranking by Total Volume is created. The new field will be added to the tooltip section. 
+
+![Figure 31: Ranking by Total Volume](Image/dataclean29.png){width=75%}
+
+27. Now, we are ready to customise the words in the tooltip. Click on the tooltip tab and a window will be opened for text to be added. In order to show a dyanamic change, we encapsulate the dimensions/measures in <>. 
+
+![Figure 32: Customisation of Tooltip](Image/dataclean30.png){width=75%}
+
+28. Finally I added in the Year filter to display YOY changes. 
+
+![Figure 33: Net Exports Chart](Image/dataclean31.png){width=75%}
+
+## 5.3. Creating Visualisations (Total Trade) - Tableau Desktop
+
+29. Next, I will create another visualisation to supplement the first chart. This chart will feature top 15 markets/regions net importer/net exporters by total trade.
+
+30. I start off with the base dimensions and measures to set-up the outline of the chart. 
+
+![Figure 34: Base chart for total trade](Image/dataclean32.png){width=75%}
+
+31. Next, I would like to filter the top-15 countries based on total trade. I will use the same method as shown in Step 20 - Step 23. At the same time, I will drop the Ranking by Total Volume dimension into rows. 
+
+![Figure 35: Adding Top-15 filter](Image/dataclean33.png){width=75%}
+
+32. To visualise imports and exports better, I will create pyramid chart. In this case, I would have to reverse the scale of the import axis.
+
+![Figure 36: Reversing the axis to create a pyramid chart](Image/dataclean34.png){width=75%}
+
+33. To differentiate between net importers and exporters, I added the "Net Importers/Exporters Filter to the colour tab.
+
+![Figure 37: Adding colours to the filtering](Image/dataclean35.png){width=75%}
+
+34. The chart is completed after editing the chart, filter and axis titles.
+
+![Figure 38: Total Volume Chart](Image/dataclean36.png){width=75%}
+
+## 5.4. Putting all together - Tableau Desktop
+
+35. Create new dashboard worksheet, and the individual charts created previously would appear on the left side Tableau Desktop.
+
+![Figure 39: Creating the dashboard](Image/dataclean37.png){width=75%}
+
+36. For this dashboard, I have decided to use Automatic as the size and used the tiled method to position the different visualisations. Tableau will automatically resize depending on the displayed screen. 
+
+37. The final visualisation is showed below with the respective titles, fliters and chart description. The dashboard is also published on [Tableau Public](https://public.tableau.com/app/profile/aaron.oh/viz/DataVizMakeover2_16239487110470/Dashboard1).
+
+![Figure 40: Final Dashboard](Image/dataclean38.png){width=75%}
+
+# 6. Observations
+
+1. In the earlier years of 2010s, Malaysia (primarily a net exporter) has the largest trade volume with Singapore. However, since 2013, Mainland China has overtaken Malaysia to take the top spot. It might also be interesting to note that Malaysia became a net importer from 2019, which could indicate a shift in the demand for certain goods with Singapore. Overall, Malaysia is still one of the largest trade partner with Singapore, likely due to our proximity with them. 
+
+2. Under net importers, it is interesting to note that there are many regions from the middle eastern countries (Saudi Arabia, UAE, Qatar). However, their total trade volume is Singapore is low, usually because due to the low exports. Given the nature of the region, it is likely that Singapore trades mineral fuels (including oil) with these countries, accounting for higher imports. Saudi Arabia has ranked consistently in the top-5.
+
+3. From 2011-2019, United States is ranked consistently high as a net importer. However, in 2020, it became a net exporter instead. Indicating a shift in trading behaviour. Between 2019 and 2020, imports has dropped significantly resulting in the shift and USA became #6 net exporter. This could indicate a shift in international relations given that Singapore has a long standing relationship with USA.
+
