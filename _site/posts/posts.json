@@ -1,19 +1,19 @@
 [
   {
     "path": "posts/2021-07-07-assignment-1/",
-    "title": "Assignment 1",
-    "description": "A short description of the post.",
+    "title": "Visual Analytics Assignment - Vast Challenge 2021",
+    "description": "Apply concepts, methods and techniques learnt in class to solve real world problem using R.\nThis was created as part of the course requirement for ISSS608 Visual Analytics for MITB.",
     "author": [
       {
         "name": "Aaron Oh",
         "url": "https://www.linkedin.com/in/aaronoh743/"
       }
     ],
-    "date": "2021-07-07",
+    "date": "2021-07-11",
     "categories": [],
-    "contents": "\r\nDistill is a publication format for scientific and technical writing, native to the web.\r\nLearn more about using Distill at https://rstudio.github.io/distill.\r\n\r\n\r\n\r\n",
+    "contents": "\r\n\r\n\r\n\r\n",
     "preview": {},
-    "last_modified": "2021-07-07T15:20:31+08:00",
+    "last_modified": "2021-07-11T21:28:10+08:00",
     "input_file": "assignment-1.knit.md"
   },
   {
