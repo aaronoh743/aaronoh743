@@ -1,14 +1,20 @@
 ---
-title: "Assignment 1"
+title: "Visual Analytics Assignment - Vast Challenge 2021"
 description: |
-  A short description of the post.
+  Apply concepts, methods and techniques learnt in class to solve real world problem using R.
+  This was created as part of the course requirement for ISSS608 Visual Analytics for MITB.
 author:
   - name: Aaron Oh
     url: https://www.linkedin.com/in/aaronoh743/
-date: 07-07-2021
+    affiliation: School of Computing and Information Systems, Singapore Management University
+    affiliation_url: https://scis.smu.edu.sg/
+    date: 07-17-2021
+
 output:
   distill::distill_article:
     self_contained: false
+    toc: true
+    toc_depth: 2
 ---
 
 
@@ -16,8 +22,6 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-Distill is a publication format for scientific and technical writing, native to the web.
 
-Learn more about using Distill at <https://rstudio.github.io/distill>.
 
 

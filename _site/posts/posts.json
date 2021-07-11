@@ -1,5 +1,22 @@
 [
   {
+    "path": "posts/2021-07-07-assignment-1/",
+    "title": "Assignment 1",
+    "description": "A short description of the post.",
+    "author": [
+      {
+        "name": "Aaron Oh",
+        "url": "https://www.linkedin.com/in/aaronoh743/"
+      }
+    ],
+    "date": "2021-07-07",
+    "categories": [],
+    "contents": "\r\nDistill is a publication format for scientific and technical writing, native to the web.\r\nLearn more about using Distill at https://rstudio.github.io/distill.\r\n\r\n\r\n\r\n",
+    "preview": {},
+    "last_modified": "2021-07-07T15:20:31+08:00",
+    "input_file": "assignment-1.knit.md"
+  },
+  {
     "path": "posts/2021-06-09-datavizmakeover2/",
     "title": "DataVizMakeover2 - Merchandise Trade by Region/Market",
     "description": "Explore different approaches to design clear data visualisation with Tableau.\nThis was created as part of the course requirement for ISSS608 Visual Analytics for MITB.",
