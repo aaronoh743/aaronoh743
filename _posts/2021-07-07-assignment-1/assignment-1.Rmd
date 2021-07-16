@@ -22,6 +22,65 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+# 1. Introduction
+
+
+
+
+
+
+# 2. Data Preparation
+
+Before we can begin analysing the questions, I will first set up the packages required for this project. It can be done with the code chunk listed below.
+
+```{r, echo = TRUE}
+
+packages = c('tidytext','widyr','wordcloud',
+             'DT','ggwordcloud','textplot',
+             'lubridate', 'hms', 'tidyverse',
+             'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
+             'visNetwork', 'topicmodels')
+
+for (p in packages) {
+  if(!require(p, character.only = T)){
+    install.packages(p)
+  }
+  library(p, character.only = T)
+}
+
+```
+
+Next, I will read in the relevant data that is used to answer the questions. 
+
+```{r, echo = TRUE}
+
+list_of_files <- "C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/News Articles"
+
+read_folder <- function (infolder) {
+  tibble(file = dir(infolder,
+                    full.names = TRUE)) %>%
+    mutate(text = map(file,
+                      read_lines)) %>%
+    transmute(id=basename(file),
+              text) %>%
+    unnest(text)
+}
+
+raw_text <- tibble(folder =
+                     dir(list_of_files,
+                         full.names=TRUE)) %>%
+  mutate(folder_out = map(folder,
+                          read_folder)) %>%
+  unnest(cols = c(folder_out)) %>%
+  transmute(newsgroup = basename(folder),
+            id, text)
+write_rds(raw_text, "C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/News Articles/allfiles.rds")
+
+for (col in colnames(raw_text)){
+  Encoding(raw_text[[col]]) <- "latin1"}
+
+```
+
 
 
 

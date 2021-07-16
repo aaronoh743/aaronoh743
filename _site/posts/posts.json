@@ -9,11 +9,11 @@
         "url": "https://www.linkedin.com/in/aaronoh743/"
       }
     ],
-    "date": "2021-07-11",
+    "date": "2021-07-16",
     "categories": [],
-    "contents": "\r\n\r\n\r\n\r\n",
+    "contents": "\r\n\r\nContents\r\n1. Introduction\r\n2. Data Preparation\r\n\r\n1. Introduction\r\n2. Data Preparation\r\nBefore we can begin analysing the questions, I will first set up the packages required for this project. It can be done with the code chunk listed below.\r\n\r\n\r\npackages = c('tidytext','widyr','wordcloud',\r\n             'DT','ggwordcloud','textplot',\r\n             'lubridate', 'hms', 'tidyverse',\r\n             'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',\r\n             'visNetwork', 'topicmodels')\r\n\r\nfor (p in packages) {\r\n  if(!require(p, character.only = T)){\r\n    install.packages(p)\r\n  }\r\n  library(p, character.only = T)\r\n}\r\n\r\n\r\n\r\nNext, I will read in the relevant data that is used to answer the questions.\r\n\r\n\r\nfor (p in packages) {\r\n  if(!require(p, character.only = T)){\r\n    install.packages(p)\r\n  }\r\n  library(p, character.only = T)\r\n}\r\n\r\n\r\nlist_of_files <- \"C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/News Articles\"\r\n\r\nread_folder <- function (infolder) {\r\n  tibble(file = dir(infolder,\r\n                    full.names = TRUE)) %>%\r\n    mutate(text = map(file,\r\n                      read_lines)) %>%\r\n    transmute(id=basename(file),\r\n              text) %>%\r\n    unnest(text)\r\n}\r\n\r\nraw_text <- tibble(folder =\r\n                     dir(list_of_files,\r\n                         full.names=TRUE)) %>%\r\n  mutate(folder_out = map(folder,\r\n                          read_folder)) %>%\r\n  unnest(cols = c(folder_out)) %>%\r\n  transmute(newsgroup = basename(folder),\r\n            id, text)\r\nwrite_rds(raw_text, \"C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/News Articles/allfiles.rds\")\r\n\r\nfor (col in colnames(raw_text)){\r\n  Encoding(raw_text[[col]]) <- \"latin1\"}\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
     "preview": {},
-    "last_modified": "2021-07-11T21:28:10+08:00",
+    "last_modified": "2021-07-16T15:48:23+08:00",
     "input_file": "assignment-1.knit.md"
   },
   {
