@@ -50,9 +50,9 @@ for (p in packages) {
 
 ```
 
-Next, I will read in the relevant data that is used to answer the questions. 
 
-```{r, echo = TRUE}
+
+```{r, echo = FALSE}
 
 list_of_files <- "C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/News Articles"
 
@@ -81,14 +81,14 @@ for (col in colnames(raw_text)){
 
 ```
 
-```{r, echo = TRUE}
+```{r, echo = FALSE}
 
-raw_text %>% 
-  group_by(newsgroup) %>%
-  summarize(messages = n_distinct(id)) %>%
-  ggplot(aes(messages, newsgroup)) +
-  geom_col(fill = "lightblue") +
-  labs(y=NULL)
+#raw_text %>% 
+  #group_by(newsgroup) %>%
+  #summarize(messages = n_distinct(id)) %>%
+  #ggplot(aes(messages, newsgroup)) +
+  #geom_col(fill = "lightblue") +
+  #labs(y=NULL)
 
 raw_text<- raw_text %>%
   #filter(raw_text$text != "") %>%
