@@ -111,3 +111,195 @@ raw_text %>%
   labs(y=NULL)
 ```
 
+## 2.2 Data Cleaning
+
+Next, I will carry out some data cleaning to make sure it can be evaluated. I have employed the following steps to clean the data. Where
+
+1. Remove empty lines from the text column. 
+
+```{r, echo = TRUE, eval=TRUE}
+raw_text<- raw_text %>%
+  #filter(raw_text$text != "") %>%
+  filter(raw_text$text != " ")
+
+head(raw_text, n=10)
+
+```
+
+2. Separate out the important variables: Location, Published Date, Source, Title and Main Text. This is done by using regex to identify the important keywords in the txt files. I have also renamed and tidied the data to allow data pivoting in the next step. 
+
+```{r, echo = TRUE, eval=TRUE}
+sep_text <- raw_text %>%
+  separate(text, c('Type', 'entry'), "(?<=LOCATION):|(?<=PUBLISHED):|(?<=SOURCE):|(?<=TITLE):", remove=FALSE)
+
+sep_text$entry[is.na(sep_text$entry)] <- sep_text$Type[is.na(sep_text$entry)] 
+sep_text <- sep_text %>%
+  mutate(Type = ifelse(entry==Type, "TEXT", Type))
+
+sep_text <- sep_text %>%
+  group_by(newsgroup,id,Type) %>%
+  summarise (entry = paste(entry, collapse = " "))
+
+sep_text <- sep_text %>%
+  unite("newsgroup_id", newsgroup:id, sep = "_")
+
+head(sep_text, n=10)
+
+```
+
+3. Using the pivot wider function to transform the important variables from rows to columns
+
+```{r, echo = TRUE, eval=TRUE}
+
+wide_text <- sep_text[,c("newsgroup_id","Type","entry")]
+wide_text <- pivot_wider(wide_text,
+                         names_from = Type,
+                         values_from = entry)
+
+wide_text_cleaned <- data.frame(lapply(wide_text,trimws))
+
+head(wide_text_cleaned, n=10)
+
+```
+
+
+4. Ensuring that the data type is correct, specifically the published date. This can be done using the parse_date_time function
+
+```{r, echo = TRUE, eval=TRUE}
+
+wide_text_cleaned$PUBLISHED <- parse_date_time(wide_text_cleaned$PUBLISHED, orders=c("ymd", "dmy HM","mdy","dmy"))
+wide_text_cleaned <- data.frame(wide_text_cleaned)
+
+```
+
+## 2.3 Data Pre-processing
+
+5. In this step, I will categorise the data with bigrams, a function that splits the text column into consecutive words. I have also attempted to remove common stopwords from the bigrams. This variable will be used as the base for other derivations. 
+
+```{r, echo = FALSE, eval=TRUE}
+
+bigrams_news <- wide_text_cleaned %>%
+  unnest_tokens(bigram, TEXT , token = "ngrams", n = 2)
+
+bigrams_news <- bigrams_news %>%
+  separate(bigram, into = c("first","second"), sep = " ", remove = FALSE) %>%
+  anti_join(stop_words, by = c("first" = "word")) %>%
+  anti_join(stop_words, by = c("second" = "word")) %>%
+  filter(str_detect(first, "[a-z]") &
+           str_detect(second, "[a-z]"))
+  
+
+head(bigrams_news, n=10)
+
+```
+
+6. Next, I will append the count of each bigrams by newsgroup_id and words. This will show the number of unique bigrams in each news article. 
+
+```{r, echo = FALSE, eval=TRUE}
+
+words_by_newsgroup <- bigrams_news %>%
+  count(newsgroup_id, bigram, sort=TRUE) %>%
+  separate (newsgroup_id, c('newsgroup','id'), '_', remove=FALSE)
+
+head(words_by_newsgroup, n=10)
+
+```
+
+7. In order to understand the relationship between different news articles, I will apply pairwise correlation on the bigrams, grouped by unique news articles.
+
+
+```{r, echo = FALSE, eval=TRUE}
+news_cors <- words_by_newsgroup %>%
+  pairwise_cor(newsgroup_id,
+               bigram,
+               n,
+               sort=TRUE)
+
+head(news_cors,n=10)
+
+```
+
+8. As I will be plotting Network graph, there is a need to rename the columns to fit the requirements.
+
+```{r, echo = FALSE, eval=TRUE}
+news_cors_aggregated <- news_cors %>%
+    rename(
+    to = item1,
+    from = item2)
+
+news_cors_node <- wide_text_cleaned %>%
+  rename(
+    id = newsgroup_id,
+    group = SOURCE
+  )
+
+```
+
+9. Next, I noticed that there are duplicates in correlation from the earlier calculations.
+
+```{r, echo = FALSE, eval=TRUE}
+news_cors_aggregated_joined <- news_cors_aggregated %>%
+  inner_join(news_cors_node, by = c("to"= "id")) %>%
+  inner_join(news_cors_node, by = c("from" = "id"))
+
+news_cors_aggregated_joined <- news_cors_aggregated_joined[c("from","to","correlation","PUBLISHED.x","PUBLISHED.y")]
+
+news_cors_aggregated_joined_sort <- news_cors_aggregated_joined %>%
+  arrange(desc(correlation), PUBLISHED.x)
+
+head(news_cors_aggregated_joined_sort,n=10)
+
+```
+
+10. As such, we will only want to keep the correlation where the published date in the from column is earlier than the to column. This will ensure that the network graph plotted later will only show the primary sources pointing to the secondary sources. In the above step, I have arranged the data based on correlation and published date in the "from" column. The next step of code will remove every 2nd entry. 
+
+```{r, echo = FALSE, eval=TRUE}
+
+ind <- seq(1,nrow(news_cors_aggregated_joined_sort),by=2)
+news_cors_aggregated_joined_sort_noduplicates <- news_cors_aggregated_joined_sort[ind,]
+
+head(news_cors_aggregated_joined_sort_noduplicates,n=10)
+
+```
+
+
+11. I will do one final tidying of the data before loading into visNetwork. I have filtered out correlations that is less than 0.70 as we want to look at news that are more closely related. I have also kept the top-10 count of networks to streamline the data on the network plot.
+
+```{r, echo = FALSE, eval=TRUE}
+news_cors_aggregated_joined_sort_noduplicates_50 <- news_cors_aggregated_joined_sort_noduplicates %>%
+  filter(correlation >= 0.70)
+
+
+news_cors_aggregated_joined_sort_noduplicates_50_top_10 <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
+  count(from) %>%
+  top_n(10)
+
+news_cors_aggregated_joined_sort_noduplicates_final <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
+  inner_join(news_cors_aggregated_joined_sort_noduplicates_50_top_10, by = "from")
+
+
+news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$from)| (news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$to),]
+```
+
+12. Plotting the visNetwork graph to understand the network.
+
+```{r, echo = FALSE, eval=TRUE}
+visNetwork(news_cors_node_filtered,
+           news_cors_aggregated_joined_sort_noduplicates_final) %>%
+  visEdges(arrows="to") %>%
+  visIgraphLayout(layout = "layout_with_fr") %>%
+  visOptions(highlightNearest = list(enabled = TRUE),
+             nodesIdSelection = TRUE,
+             selectedBy = "group") %>%
+  visLayout(randomSeed = 123)
+
+
+```
+
+# 5. References
+
+[1] UNSW Sydney. (n.d.). Primary and secondary sources. UNSW Sydney Library. https://www.library.unsw.edu.au/study/information-resources/primary-and-secondary-sources#:~:text=Primary%20sources%20provide%20a%20first,they%20can%20share%20new%20information.&amp;text=Secondary%20sources%20involve%20analysis%2C%20synthesis,or%20evaluation%20of%20primary%20sources. 
+
+
+
+
