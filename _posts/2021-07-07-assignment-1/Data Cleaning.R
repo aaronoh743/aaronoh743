@@ -4,7 +4,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels')
+             'visNetwork', 'topicmodels', 'crosstalk')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -89,88 +89,158 @@ usenet_words <- wide_text_cleaned %>%
   filter(str_detect(word, "[a-z']$"),
          !word %in% stop_words$word)
 
-words_by_newsgroup <- usenet_words %>%
-  count(newsgroup_id, word, sort=TRUE) %>%
+#n-grams
+bigrams_news <- wide_text_cleaned %>%
+  unnest_tokens(bigram, TEXT , token = "ngrams", n = 2)
+
+bigrams_news <- bigrams_news %>%
+  separate(bigram, into = c("first","second"), sep = " ", remove = FALSE) %>%
+  anti_join(stop_words, by = c("first" = "word")) %>%
+  anti_join(stop_words, by = c("second" = "word")) %>%
+  filter(str_detect(first, "[a-z]") &
+           str_detect(second, "[a-z]"))
+  
+
+words_by_newsgroup <- bigrams_news %>%
+  count(newsgroup_id, bigram, sort=TRUE) %>%
   separate (newsgroup_id, c('newsgroup','id'), '_', remove=FALSE)
 
 news_cors <- words_by_newsgroup %>%
   pairwise_cor(newsgroup_id,
-               word,
+               bigram,
                n,
                sort=TRUE)
 
 news_cors_aggregated <- news_cors %>%
     rename(
-    from = item1,
-    to = item2)
+    to = item1,
+    from = item2)
 
 news_cors_node <- wide_text_cleaned %>%
   rename(
-    id = newsgroup_id
+    id = newsgroup_id,
+    group = SOURCE
   )
 
 
 news_cors_aggregated_joined <- news_cors_aggregated %>%
-  inner_join(news_cors_node, by = c("from"= "id")) %>%
-  inner_join(news_cors_node, by = c("to" = "id"))
+  inner_join(news_cors_node, by = c("to"= "id")) %>%
+  inner_join(news_cors_node, by = c("from" = "id"))
 
 news_cors_aggregated_joined <- news_cors_aggregated_joined[c("from","to","correlation","PUBLISHED.x","PUBLISHED.y")]
 
 news_cors_aggregated_joined_sort <- news_cors_aggregated_joined %>%
   arrange(desc(correlation), PUBLISHED.x)
 
-ind <- seq(2,nrow(news_cors_aggregated_joined_sort),by=2)
+ind <- seq(1,nrow(news_cors_aggregated_joined_sort),by=2)
 news_cors_aggregated_joined_sort_noduplicates <- news_cors_aggregated_joined_sort[ind,]
 
 news_cors_aggregated_joined_sort_noduplicates_50 <- news_cors_aggregated_joined_sort_noduplicates %>%
-  filter(correlation > 0.80)
+  filter(correlation > 0.70)
 
-news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_50$from)| (news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_50$to),]
+news_cors_aggregated_joined_sort_noduplicates_50_top_10 <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
+  count(from) %>%
+  top_n(10)
+
+news_cors_aggregated_joined_sort_noduplicates_final <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
+  inner_join(news_cors_aggregated_joined_sort_noduplicates_50_top_10, by = "from")
+
+news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$from)| (news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$to),]
+
 
 visNetwork(news_cors_node_filtered,
-           news_cors_aggregated_joined_sort_noduplicates_50) %>%
+           news_cors_aggregated_joined_sort_noduplicates_final) %>%
   visEdges(arrows="to") %>%
   visIgraphLayout(layout = "layout_with_fr") %>%
   visOptions(highlightNearest = list(enabled = TRUE),
              nodesIdSelection = TRUE,
-             selectedBy = "SOURCE") %>%
-  visLegend() %>%
-  visLayout(randomSeed = 124)
+             selectedBy = "group") %>%
+  visLayout(randomSeed = 123)
+
 
 
 #Visualising Biases - LDA
 
-packages_biases = c('openxlsx','rJava', 'NLP','openNLP','RWeka')
+df_from <- distinct(news_cors_aggregated_joined_sort_noduplicates_top10_final,from)
+df_to <- distinct(news_cors_aggregated_joined_sort_noduplicates_top10_final,to) %>%
+  rename("from" = "to")
+df_combined <- rbind(df_from,df_to) %>%
+  rename("newsgroup_id" = "from") %>%
+  distinct() %>%
+  left_join()
 
-for (p in packages_biases) {
-  if(!require(p, character.only = T)){
-    install.packages_biases(p)
-  }
-  library(p, character.only = T)
-}
+usenet_words_network <- news_cors_node_filtered %>%
+  unnest_tokens(word, TEXT) %>%
+  filter(str_detect(word, "[a-z']$"),
+         !word %in% stop_words$word)
 
-word_sci_newsgroups <- usenet_words %>%
+word_network_newsgroups <- usenet_words_network %>%
   group_by(word) %>%
   mutate(word_total = n()) %>%
   ungroup()%>%
-  filter(word_total > 50)
+  filter(word_total > 30)
 
-
-
-word_sci_dtm <- word_sci_newsgroups %>%
-  unite(document, SOURCE, newsgroup_id) %>%
+word_network_dtm <- word_network_newsgroups %>%
+  unite(document, SOURCE, id) %>%
   count(document,word) %>%
   cast_dtm(document, word, n)
 
-word_lda <- LDA(word_sci_dtm, k=4, control = list(seed = 2016))  
+word_lda <- LDA(word_network_dtm, k=7, control = list(seed = 2016))
+
 
 word_lda %>%
   tidy() %>%
   group_by(topic) %>%
-  slice_max(beta, n = 8) %>%
+  slice_max(beta, n = 30) %>%
   ungroup() %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
+
+
+news_cors_aggregated_joined_sort_noduplicates_50 %>%
+    group_by(from) %>%
+    summarise(networks=n()) %>%
+    top_n(10) %>%
+    ggplot(aes(networks, from)) +
+    geom_col(fill = "lightblue") +
+    labs(y=NULL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Question 3
+#Reading in Datasource
+
+employees_records <- readxl::read_xlsx("C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/EmployeeRecords.xlsx")
+employees_records_cleaned <- employees_records %>%
+  unite(fullname, FirstName, LastName, sep = " ", remove=FALSE)
+
+email_records <- read_csv("C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/email headers.csv")
+email_records_cleaned <- email_records %>%
+  mutate(To = str_remove_all(To,"@gastech.com.kronos|@gastech.com.tethys")) %>%
+  mutate(To = str_replace_all(To, "[.]", " ")) %>%
+  mutate(From = str_remove_all(From,"@gastech.com.kronos|@gastech.com.tethys")) %>%
+  mutate(From = str_replace_all(From, "[.]", " ")) %>%
+  mutate(Date = parse_date_time(x = Date, orders =c("%m%d%y %H%M","%m%d%y")))
+
+em
+
+
+
+
+
+
