@@ -41,9 +41,6 @@ In this mini-challenge, we are tasked to investigate the relationships and condi
 By definition, primary sources are first-hand account of an event and typically represent an original view, reporting on discoveries and events, or sharing new information. A derivative source, on the other hand, typically involves an analysis and/or interpretation of the primary sources. Given the definitions, derivative sources have 2 main traits - (1) similar content to the primary source(s) and (2)published after the primary sources.Using these traits, it is likely to create a network between the primary and secondary sources, and subsequently deep-dive to understand what are the articles discussing. 
 
 
-
-
-
 # 3. Question 1 Analysis
 
 Before we can begin analysing the questions, I will first set up the packages required for this project. It can be done with the code chunk listed below.
@@ -54,7 +51,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk')
+             'visNetwork', 'topicmodels', 'crosstalk', 'pixiedust')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -174,22 +171,24 @@ wide_text_cleaned <- data.frame(wide_text_cleaned)
 
 ## 2.3 Data Pre-processing
 
-5. In this step, I will categorise the data with bigrams, a function that splits the text column into consecutive words. I have also attempted to remove common stopwords from the bigrams. This variable will be used as the base for other derivations. 
+5. In this step, I will categorise the data with trigrams, a function that splits the text column into consecutive words. I have also attempted to remove common stopwords from the trigrams. This variable will be used as the base for other derivations. 
 
 ```{r, echo = FALSE, eval=TRUE}
 
-bigrams_news <- wide_text_cleaned %>%
-  unnest_tokens(bigram, TEXT , token = "ngrams", n = 2)
+trigrams_news <- wide_text_cleaned %>%
+  unnest_tokens(trigram, TEXT , token = "ngrams", n = 3)
 
-bigrams_news <- bigrams_news %>%
-  separate(bigram, into = c("first","second"), sep = " ", remove = FALSE) %>%
+trigrams_news <- trigrams_news %>%
+  separate(trigram, into = c("first","second","third"), sep = " ", remove = FALSE) %>%
   anti_join(stop_words, by = c("first" = "word")) %>%
   anti_join(stop_words, by = c("second" = "word")) %>%
+  anti_join(stop_words, by = c("third" = "word")) %>%
   filter(str_detect(first, "[a-z]") &
-           str_detect(second, "[a-z]"))
+           str_detect(second, "[a-z]") &
+           str_detect(third, "[a-z]"))
   
 
-head(bigrams_news, n=10)
+head(trigrams_news, n=10)
 
 ```
 
@@ -197,8 +196,8 @@ head(bigrams_news, n=10)
 
 ```{r, echo = FALSE, eval=TRUE}
 
-words_by_newsgroup <- bigrams_news %>%
-  count(newsgroup_id, bigram, sort=TRUE) %>%
+words_by_newsgroup <- trigrams_news %>%
+  count(newsgroup_id, trigram, sort=TRUE) %>%
   separate (newsgroup_id, c('newsgroup','id'), '_', remove=FALSE)
 
 head(words_by_newsgroup, n=10)
@@ -211,7 +210,7 @@ head(words_by_newsgroup, n=10)
 ```{r, echo = FALSE, eval=TRUE}
 news_cors <- words_by_newsgroup %>%
   pairwise_cor(newsgroup_id,
-               bigram,
+               trigram,
                n,
                sort=TRUE)
 
@@ -263,22 +262,23 @@ head(news_cors_aggregated_joined_sort_noduplicates,n=10)
 ```
 
 
-11. I will do one final tidying of the data before loading into visNetwork. I have filtered out correlations that is less than 0.70 as we want to look at news that are more closely related. I have also kept the top-10 count of networks to streamline the data on the network plot.
+11. I will do one final tidying of the data before loading into visNetwork. I have filtered out correlations that is less than 0.30 as we want to look at news that are more closely related. I have also kept the top-30 count of networks to streamline the data on the network plot.
 
 ```{r, echo = FALSE, eval=TRUE}
 news_cors_aggregated_joined_sort_noduplicates_50 <- news_cors_aggregated_joined_sort_noduplicates %>%
-  filter(correlation >= 0.70)
+  filter(correlation >= 0.30)
 
 
 news_cors_aggregated_joined_sort_noduplicates_50_top_10 <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
   count(from) %>%
-  top_n(10)
+  top_n(30)
 
 news_cors_aggregated_joined_sort_noduplicates_final <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
   inner_join(news_cors_aggregated_joined_sort_noduplicates_50_top_10, by = "from")
 
 
 news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$from)| (news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$to),]
+
 ```
 
 12. Plotting the visNetwork graph to understand the network.
@@ -295,6 +295,14 @@ visNetwork(news_cors_node_filtered,
 
 
 ```
+
+## 2.4 Analysis
+
+1. From the network plot, we are able to differentiate the primary and the derivative sources. News articles that are closely correlated are linked together. The direction of the arrows will point from the primary source to the derivative source. 
+
+![Figure 1: Classification of Primary and Derivative Source](Image/image1.png)
+
+2. From the above figure, "The Explainer_382" is the primary source for "The Abila Post_233" and "Central Bulletin_244" and subsequently used as a source for "News Online Today_489. 
 
 # 5. References
 
