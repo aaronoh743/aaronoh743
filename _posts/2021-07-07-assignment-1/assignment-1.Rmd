@@ -354,7 +354,7 @@ employees_records_cleaned_rename <- employees_records_cleaned %>%
 email_records_cleaned2_rename <- email_records_cleaned2 %>%
   rename (from = From) %>%
   rename (to = To) %>%
-  mutate(Subject = str_remove_all(Subject,"RE: "))
+  mutate(Subject = str_remove_all(Subject,"RE"))
 
 email_records_cleaned2_rename_aggregated <- email_records_cleaned2_rename %>%
   group_by (from, to, Subject) %>%
@@ -368,18 +368,36 @@ email_records_cleaned2_rename_aggregated <- email_records_cleaned2_rename %>%
 
 # 5.2 Data Preprocessing
 
-1. We are now ready to plot a visNetwork graph to show communication between individual staff and departments
+1. We are now ready to plot a visNetwork graph to show communication between individual staff and departments.
 
 ```{r, echo = TRUE, eval=TRUE}
 visNetwork(employees_records_cleaned_rename,
            email_records_cleaned2_rename_aggregated) %>%
-  visEdges(arrows="to") %>%
+  visEdges(arrows="from") %>%
   visIgraphLayout(layout = "layout_with_fr") %>%
   visOptions(highlightNearest = TRUE,
              nodesIdSelection = TRUE,selectedBy = "group", collapse=TRUE) %>%
   visLayout(randomSeed = 123) %>%
   visLegend()
 ```
+
+2. Next, I have prepared a datatable that allows filtering. This will give a list of correspondents and subject headers of the email sent. It will be useful to determine the relationship between different employees in the organisation. 
+
+```{r, echo = TRUE, eval=TRUE}
+
+email_records_analysis <- email_records_cleaned2_rename %>%
+  group_by(from,to,Subject) %>%
+  summarise(count=n()) %>%
+  filter(from!=to) %>%
+  arrange(desc(count)) %>%
+  filter(count>0) %>%
+  rename(c("Sender" = "from","Recipient" = "to"))
+
+datatable(email_records_analysis, filter='top', options = list(
+  autoWidth = TRUE))
+
+```
+  
 
 # 6. References
 
