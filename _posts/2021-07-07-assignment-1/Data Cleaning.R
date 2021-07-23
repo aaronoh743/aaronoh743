@@ -4,7 +4,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk')
+             'visNetwork', 'topicmodels', 'crosstalk', 'utf8')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -90,26 +90,29 @@ usenet_words <- wide_text_cleaned %>%
          !word %in% stop_words$word)
 
 #n-grams
-bigrams_news <- wide_text_cleaned %>%
-  unnest_tokens(bigram, TEXT , token = "ngrams", n = 2)
+trigrams_news <- wide_text_cleaned %>%
+  unnest_tokens(trigram, TEXT , token = "ngrams", n = 3)
 
-bigrams_news <- bigrams_news %>%
-  separate(bigram, into = c("first","second"), sep = " ", remove = FALSE) %>%
+trigrams_news <- trigrams_news %>%
+  separate(trigram, into = c("first","second","third"), sep = " ", remove = FALSE) %>%
   anti_join(stop_words, by = c("first" = "word")) %>%
   anti_join(stop_words, by = c("second" = "word")) %>%
+  anti_join(stop_words, by = c("third" = "word")) %>%
   filter(str_detect(first, "[a-z]") &
-           str_detect(second, "[a-z]"))
+           str_detect(second, "[a-z]") &
+           str_detect(third, "[a-z]"))
   
 
-words_by_newsgroup <- bigrams_news %>%
-  count(newsgroup_id, bigram, sort=TRUE) %>%
+words_by_newsgroup <- trigrams_news %>%
+  count(newsgroup_id, trigram, sort=TRUE) %>%
   separate (newsgroup_id, c('newsgroup','id'), '_', remove=FALSE)
 
 news_cors <- words_by_newsgroup %>%
   pairwise_cor(newsgroup_id,
-               bigram,
+               trigram,
                n,
                sort=TRUE)
+
 
 news_cors_aggregated <- news_cors %>%
     rename(
@@ -136,17 +139,18 @@ ind <- seq(1,nrow(news_cors_aggregated_joined_sort),by=2)
 news_cors_aggregated_joined_sort_noduplicates <- news_cors_aggregated_joined_sort[ind,]
 
 news_cors_aggregated_joined_sort_noduplicates_50 <- news_cors_aggregated_joined_sort_noduplicates %>%
-  filter(correlation > 0.70)
+  filter(correlation >= 0.40)
+
 
 news_cors_aggregated_joined_sort_noduplicates_50_top_10 <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
   count(from) %>%
-  top_n(10)
+  top_n(30)
 
 news_cors_aggregated_joined_sort_noduplicates_final <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
   inner_join(news_cors_aggregated_joined_sort_noduplicates_50_top_10, by = "from")
 
-news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$from)| (news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$to),]
 
+news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$from)| (news_cors_node$id %in% news_cors_aggregated_joined_sort_noduplicates_final$to),]
 
 visNetwork(news_cors_node_filtered,
            news_cors_aggregated_joined_sort_noduplicates_final) %>%
@@ -227,7 +231,10 @@ news_cors_aggregated_joined_sort_noduplicates_50 %>%
 
 employees_records <- readxl::read_xlsx("C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/EmployeeRecords.xlsx")
 employees_records_cleaned <- employees_records %>%
-  unite(fullname, FirstName, LastName, sep = " ", remove=FALSE)
+  unite(fullname, FirstName, LastName, sep = " ", remove=FALSE) %>%
+  mutate_if(is.character, utf8_encode)
+
+employees_records_cleaned$fullname <- trimws(employees_records_cleaned$fullname, which = c("both"))
 
 email_records <- read_csv("C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/email headers.csv")
 email_records_cleaned <- email_records %>%
@@ -235,12 +242,88 @@ email_records_cleaned <- email_records %>%
   mutate(To = str_replace_all(To, "[.]", " ")) %>%
   mutate(From = str_remove_all(From,"@gastech.com.kronos|@gastech.com.tethys")) %>%
   mutate(From = str_replace_all(From, "[.]", " ")) %>%
-  mutate(Date = parse_date_time(x = Date, orders =c("%m%d%y %H%M","%m%d%y")))
+  mutate(Date = parse_date_time(x = Date, orders =c("%m%d%y %H%M","%m%d%y"))) %>%
+  mutate_if(is.character, utf8_encode)
 
-em
+email_records_cleaned2 <- strsplit(email_records_cleaned$To, split=",")
+email_records_cleaned2 <- data.frame(From = rep(email_records_cleaned$From, sapply(email_records_cleaned2, length)), To = unlist(email_records_cleaned2), Date = rep(email_records_cleaned$Date, sapply(email_records_cleaned2, length)),Subject =  rep(email_records_cleaned$Subject, sapply(email_records_cleaned2, length)))
+email_records_cleaned2$To <- trimws(email_records_cleaned2$To, which = c("both"))
+email_records_cleaned2$From <- trimws(email_records_cleaned2$From, which = c("both"))
+email_records_cleaned2_rename$Subject <- gsub("[[:punct:]]", "", email_records_cleaned2_rename$Subject)
+
+#Tidying node list
+employees_records_cleaned_rename <- employees_records_cleaned %>%
+  rename(id = fullname) %>%
+  rename (group = CurrentEmploymentType) %>%
+  arrange(id)
+
+#Tidying edge list
+email_records_cleaned2_rename <- email_records_cleaned2 %>%
+  rename (from = From) %>%
+  rename (to = To) %>%
+  mutate(Subject = str_remove_all(Subject,"RE: "))
 
 
 
 
+email_records_cleaned2_rename_aggregated <- email_records_cleaned2_rename %>%
+  group_by (from, to, Subject) %>%
+  summarise(Weight = n()) %>%
+  filter(from!=to) %>%
+  filter(to!=from) %>%
+  filter(Weight > 1) %>%
+  ungroup()
 
 
+
+#High Level Network Analysis
+visNetwork(employees_records_cleaned_rename,
+           email_records_cleaned2_rename_aggregated) %>%
+  visEdges(arrows="to") %>%
+  visIgraphLayout(layout = "layout_with_fr") %>%
+  visOptions(highlightNearest = TRUE,
+             nodesIdSelection = TRUE,selectedBy = "group", collapse=TRUE) %>%
+  visLayout(randomSeed = 123)
+
+
+#Deeper Analysis
+
+email_records_analysis <- email_records_cleaned2_rename %>%
+  group_by(from,to,Subject) %>%
+  summarise(count=n()) %>%
+  filter(from!=to) %>%
+  arrange(desc(count))
+  ungroup()
+
+datatable(email_records_analysis, filter='top', options = list(
+  autoWidth = TRUE
+))
+  
+  
+  
+  ggplot(aes(reorder_within(Subject,count,from),count,
+             fill = from)) +
+    geom_col(alpha =0.8, show.legend = FALSE) + 
+    scale_x_reordered() +
+    coord_flip() +
+    facet_wrap(~from, scales = "free") +
+    scale_y_continuous(expand = c(0,0))
+  
+email_records_analysis
+
+email_records_analysis_cleaned <- email_records_analysis %>%
+  count(from,to, sort=TRUE) %>%
+  group_by(from) %>%
+  top_n(20) %>%
+  filter(from == c("Linnea Bergen")) %>%
+  ungroup () %>%
+  ggplot(aes(reorder_within(word,count,from),count,
+             fill = from
+             )) +
+  geom_col(alpha =0.8, show.legend = FALSE) + 
+  scale_x_reordered() +
+  coord_flip() +
+  facet_wrap(~from, scales = "free") +
+  scale_y_continuous(expand = c(0,0))
+
+email_records_analysis_cleaned

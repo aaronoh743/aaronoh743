@@ -51,7 +51,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk', 'pixiedust')
+             'visNetwork', 'topicmodels', 'crosstalk', 'utf8')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -62,7 +62,7 @@ for (p in packages) {
 
 ```
 
-## 2.1 Data Preparation
+## 3.1 Data Preparation
 
 First, I have loaded the news articles required for the first question. The code below will read individual text file as one id group and save it as a dataframe
 
@@ -108,7 +108,7 @@ raw_text %>%
   labs(y=NULL)
 ```
 
-## 2.2 Data Cleaning
+## 3.2 Data Cleaning
 
 Next, I will carry out some data cleaning to make sure it can be evaluated. I have employed the following steps to clean the data. Where
 
@@ -169,7 +169,7 @@ wide_text_cleaned <- data.frame(wide_text_cleaned)
 
 ```
 
-## 2.3 Data Pre-processing
+## 233 Data Preprocessing
 
 5. In this step, I will categorise the data with trigrams, a function that splits the text column into consecutive words. I have also attempted to remove common stopwords from the trigrams. This variable will be used as the base for other derivations. 
 
@@ -187,7 +187,6 @@ trigrams_news <- trigrams_news %>%
            str_detect(second, "[a-z]") &
            str_detect(third, "[a-z]"))
   
-
 head(trigrams_news, n=10)
 
 ```
@@ -262,11 +261,11 @@ head(news_cors_aggregated_joined_sort_noduplicates,n=10)
 ```
 
 
-11. I will do one final tidying of the data before loading into visNetwork. I have filtered out correlations that is less than 0.30 as we want to look at news that are more closely related. I have also kept the top-30 count of networks to streamline the data on the network plot.
+11. I will do one final tidying of the data before loading into visNetwork. I have filtered out correlations that is less than 0.40 as we want to look at news that are more closely related. I have also kept the top-30 count of networks to streamline the data on the network plot.
 
 ```{r, echo = FALSE, eval=TRUE}
 news_cors_aggregated_joined_sort_noduplicates_50 <- news_cors_aggregated_joined_sort_noduplicates %>%
-  filter(correlation >= 0.30)
+  filter(correlation >= 0.40)
 
 
 news_cors_aggregated_joined_sort_noduplicates_50_top_10 <- news_cors_aggregated_joined_sort_noduplicates_50 %>%
@@ -296,15 +295,93 @@ visNetwork(news_cors_node_filtered,
 
 ```
 
-## 2.4 Analysis
+## 3.4 Analysis
 
-1. From the network plot, we are able to differentiate the primary and the derivative sources. News articles that are closely correlated are linked together. The direction of the arrows will point from the primary source to the derivative source. 
+1. From the network plot, we are able to differentiate the primary and the derivative sources. News articles that are closely correlated are linked together. The direction of the arrows will point from the primary source to the derivative source for articles that are closely related. 
 
-![Figure 1: Classification of Primary and Derivative Source](Image/image1.png)
+![Figure 1: Classification of Primary and Derivative Source]()
 
 2. From the above figure, "The Explainer_382" is the primary source for "The Abila Post_233" and "Central Bulletin_244" and subsequently used as a source for "News Online Today_489. 
 
-# 5. References
+
+
+
+
+# 5. Question 3 Analysis
+
+## 5.1 Data Preparation
+
+1. First, I have loaded the data provided - employees and email records. I have also done some simple data cleaning to remove information that are not useful for text analysis. I have also ensured that the data type is consistent.
+
+```{r, echo = TRUE, eval=TRUE}
+employees_records <- readxl::read_xlsx("C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/EmployeeRecords.xlsx")
+employees_records_cleaned <- employees_records %>%
+  unite(fullname, FirstName, LastName, sep = " ", remove=FALSE) %>%
+  mutate_if(is.character, utf8_encode)
+
+employees_records_cleaned$fullname <- trimws(employees_records_cleaned$fullname, which = c("both"))
+
+email_records <- read_csv("C:/Users/aaron/Documents/Aaron Documents/Semester 3/VA/Assignment/Raw Data/email headers.csv")
+email_records_cleaned <- email_records %>%
+  mutate(To = str_remove_all(To,"@gastech.com.kronos|@gastech.com.tethys")) %>%
+  mutate(To = str_replace_all(To, "[.]", " ")) %>%
+  mutate(From = str_remove_all(From,"@gastech.com.kronos|@gastech.com.tethys")) %>%
+  mutate(From = str_replace_all(From, "[.]", " ")) %>%
+  mutate(Date = parse_date_time(x = Date, orders =c("%m%d%y %H%M","%m%d%y"))) %>%
+  mutate_if(is.character, utf8_encode)
+
+email_records_cleaned2 <- strsplit(email_records_cleaned$To, split=",")
+email_records_cleaned2 <- data.frame(From = rep(email_records_cleaned$From, sapply(email_records_cleaned2, length)), To = unlist(email_records_cleaned2), Date = rep(email_records_cleaned$Date, sapply(email_records_cleaned2, length)),Subject =  rep(email_records_cleaned$Subject, sapply(email_records_cleaned2, length)))
+email_records_cleaned2$To <- trimws(email_records_cleaned2$To, which = c("both"))
+email_records_cleaned2$From <- trimws(email_records_cleaned2$From, which = c("both"))
+email_records_cleaned2$Subject <- gsub("[[:punct:]]", "", email_records_cleaned2$Subject)
+
+
+```
+
+2. Next, I will prepare the node and edge dataframe to build a network diagram using visNetowrk. This will allow us to view who are linked together. It indicates some form of communication and relationship between them. The node and edge dataframe needs to have pre-defined column name and format for the function to plot the relevant graph. The edge list is also aggregated to based on the sender, recipient and subject. 
+
+```{r, echo = TRUE, eval=TRUE}
+
+#Tidying node list
+employees_records_cleaned_rename <- employees_records_cleaned %>%
+  rename(id = fullname) %>%
+  rename (group = CurrentEmploymentType) %>%
+  arrange(id)
+
+#Tidying edge list
+
+email_records_cleaned2_rename <- email_records_cleaned2 %>%
+  rename (from = From) %>%
+  rename (to = To) %>%
+  mutate(Subject = str_remove_all(Subject,"RE: "))
+
+email_records_cleaned2_rename_aggregated <- email_records_cleaned2_rename %>%
+  group_by (from, to, Subject) %>%
+  summarise(Weight = n()) %>%
+  filter(from!=to) %>%
+  filter(to!=from) %>%
+  filter(Weight > 1) %>%
+  ungroup()
+
+```
+
+# 5.2 Data Preprocessing
+
+1. We are now ready to plot a visNetwork graph to show communication between individual staff and departments
+
+```{r, echo = TRUE, eval=TRUE}
+visNetwork(employees_records_cleaned_rename,
+           email_records_cleaned2_rename_aggregated) %>%
+  visEdges(arrows="to") %>%
+  visIgraphLayout(layout = "layout_with_fr") %>%
+  visOptions(highlightNearest = TRUE,
+             nodesIdSelection = TRUE,selectedBy = "group", collapse=TRUE) %>%
+  visLayout(randomSeed = 123) %>%
+  visLegend()
+```
+
+# 6. References
 
 [1] UNSW Sydney. (n.d.). Primary and secondary sources. UNSW Sydney Library. https://www.library.unsw.edu.au/study/information-resources/primary-and-secondary-sources#:~:text=Primary%20sources%20provide%20a%20first,they%20can%20share%20new%20information.&amp;text=Secondary%20sources%20involve%20analysis%2C%20synthesis,or%20evaluation%20of%20primary%20sources. 
 
