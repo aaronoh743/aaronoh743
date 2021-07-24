@@ -51,7 +51,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk', 'utf8')
+             'visNetwork', 'topicmodels', 'crosstalk', 'utf8', 'knitr')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -373,7 +373,7 @@ email_records_cleaned2_rename_aggregated <- email_records_cleaned2_rename %>%
 ```{r, echo = TRUE, eval=TRUE}
 visNetwork(employees_records_cleaned_rename,
            email_records_cleaned2_rename_aggregated) %>%
-  visEdges(arrows="from") %>%
+  visEdges(arrows="to") %>%
   visIgraphLayout(layout = "layout_with_fr") %>%
   visOptions(highlightNearest = TRUE,
              nodesIdSelection = TRUE,selectedBy = "group", collapse=TRUE) %>%
@@ -397,7 +397,61 @@ datatable(email_records_analysis, filter='top', options = list(
   autoWidth = TRUE))
 
 ```
-  
+
+# 5.3 Analysis
+
+1. First, I have summarised the list of unique topics to understand the different types of correspondence between employees. From the diagram below, we can understand the number of correspondence between different members of the staff. The datatable is interactive and can be filtered based on Subject. 
+
+```{r, echo = TRUE, eval=TRUE}
+
+emails_records_summary <- email_records_cleaned2_rename %>%
+  filter(from!=to) %>%
+  group_by(Subject) %>%
+  summarise(count=n()) %>%
+  arrange(desc(count)) %>%
+  filter(count>0)
+
+datatable(emails_records_summary, filter='top', options = list(
+  autoWidth = FALSE))
+
+```
+
+2. Upon closer inspection, while some of the email subjects might indicate some personal relationship (casino nights, planning for staff picnic), they are in fact events initiated by the company and seemed to be sent to all employees. We will ignore these emails. 
+
+3. Next, an observation from the network analysis showed that 2 staff have the most number of correspondence with the employees. They are namely, Linnea Bergan and Ruscella Mies Haber from the administration team. Upon closer inspection in the email headers, we can conclude that they typically send group emails to the employees with regard to administrative and Information Technology related topics. As such, the information might not be as useful in determining relationships and will be excluded in the analysis below.  
+
+4. In the next few steps, I will summarise some of the relationships between employees based on the email topics. 
+
+__CEO Sten Sanjorge Network__
+
+![CEO Sten Sanjorge Network](Image/Image 2.PNG)
+
+From the network graph, we can tell that Sten has frequent communication between his Executive team presumbly on the outcomes of the business. However, we can use the datatable to determine what kind of correspondences are happening between his co-workers.
+
+![CEO Sten Sanjorge Correspondance with Executive Team](Image/Image 6.PNG)
+
+It seemed that Sten has personal relationships with Ada Campo, Orhan Strum and William Vasco as there were emails going back and forth with regards to an impromptu golf game and seeking for recommendation for a good vacation spot. Ingrid Barranco only spoke to Sten with regard to work events only.
+
+Another correspondence is with Henk Mies, a Truck Driver from the Facilities department. Unfortunately, we only have the subject title of the email and is only labelled files. We will assume that this is a work incident that requires CEO's attention. 
+
+![CEO Sten Sanjorge Correspondance with Henk Mies](Image/Image 6.PNG)
+
+__Facilities Department Network__
+
+The facilities department seemingly have a close personal relationship with one another, seemingly from the Guys Night Out invite extended to the department. The information can be retrieved from the data table.
+
+![Guys Night Out Correspondance](Image/Image 9.PNG)
+
+However, it might interesting to note that Bertrand Ovan, being the Facilities Group Manager, did not any correspondence with other departments.Instead, any cross departmental communications were managed by the other team members. For instance, the preparation for the January 20 VIP meeting was managed primarily by Emile Arpa, a janitor by designation. The instructions were primarily initiated by Emile to other departments. 
+
+![January 2020 VIP Meeting Preparation](Image/Image 11.PNG)
+
+
+Another staff, Benito Hawelon, also has personal correspondace with Felix Resumir regarding a coffee run and GASTech announcements. This could indicate some form of personal relationship between the two employees. This is an unique email between both employees and does not include others. 
+
+![Benito Hawelon Network](Image/Image 12.PNG)
+
+
 
 # 6. References
 
