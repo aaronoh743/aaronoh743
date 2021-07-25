@@ -4,7 +4,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk', 'utf8')
+             'visNetwork', 'topicmodels', 'crosstalk', 'utf8','ldatuning', 'topicmodels')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -165,37 +165,31 @@ visNetwork(news_cors_node_filtered,
 
 #Visualising Biases - LDA
 
-df_from <- distinct(news_cors_aggregated_joined_sort_noduplicates_top10_final,from)
-df_to <- distinct(news_cors_aggregated_joined_sort_noduplicates_top10_final,to) %>%
-  rename("from" = "to")
-df_combined <- rbind(df_from,df_to) %>%
-  rename("newsgroup_id" = "from") %>%
-  distinct() %>%
-  left_join()
 
-usenet_words_network <- news_cors_node_filtered %>%
-  unnest_tokens(word, TEXT) %>%
-  filter(str_detect(word, "[a-z']$"),
-         !word %in% stop_words$word)
 
-word_network_newsgroups <- usenet_words_network %>%
+tidy_source_text <- wide_text_cleaned %>%
+  unnest_tokens(word,TEXT) %>%
+  filter(!word %in% stop_words$word,
+         !word %in% str_remove_all(stop_words$word, "'"),
+         str_detect(word, "[a-z]")) %>%
   group_by(word) %>%
-  mutate(word_total = n()) %>%
-  ungroup()%>%
-  filter(word_total > 30)
+  mutate(count = n()) %>%
+  ungroup() %>%
+  filter(count>30)
 
-word_network_dtm <- word_network_newsgroups %>%
-  unite(document, SOURCE, id) %>%
-  count(document,word) %>%
+tidy_source_dtm <- tidy_source_text %>%
+  unite(document,SOURCE,newsgroup_id) %>%
+  count(document, word) %>%
   cast_dtm(document, word, n)
 
-word_lda <- LDA(word_network_dtm, k=7, control = list(seed = 2016))
+
+tidy_source_lda <- LDA(tidy_source_dtm, k=8, control=list(seed=2020))
 
 
-word_lda %>%
+tidy_source_lda  %>%
   tidy() %>%
   group_by(topic) %>%
-  slice_max(beta, n = 30) %>%
+  slice_max(beta, n = 15) %>%
   ungroup() %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
@@ -203,21 +197,30 @@ word_lda %>%
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
 
+result <- FindTopicsNumber(
+  tidy_source_dtm,
+  topics = seq(from = 2, to =15, by =1),
+  metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
+  method = "Gibbs",
+  control = list(seed = 20202),
+  mc.cores = 2L,
+  verbose = TRUE
+  
+)
 
-news_cors_aggregated_joined_sort_noduplicates_50 %>%
-    group_by(from) %>%
-    summarise(networks=n()) %>%
-    top_n(10) %>%
-    ggplot(aes(networks, from)) +
-    geom_col(fill = "lightblue") +
-    labs(y=NULL)
+FindTopicsNumber_plot(result)
 
 
-
-
-
-
-
+tidy_source_lda %>%
+  tidy(matrix = "gamma") %>%
+  separate(document, c("SOURCE",newsgroup_id), sep = "_") %>%
+  mutate(SOURCE = reorder(SOURCE, gamma * topic)) %>%
+  ggplot(aes(factor(topic), gamma)) +
+  geom_boxplot() +
+  facet_wrap(~ SOURCE) +
+  labs(x = "Topic",
+       y = "# of messages where this was the highest % topic")
+  
 
 
 

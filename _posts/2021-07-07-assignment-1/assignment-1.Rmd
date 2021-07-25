@@ -40,6 +40,11 @@ In this mini-challenge, we are tasked to investigate the relationships and condi
 
 By definition, primary sources are first-hand account of an event and typically represent an original view, reporting on discoveries and events, or sharing new information. A derivative source, on the other hand, typically involves an analysis and/or interpretation of the primary sources. Given the definitions, derivative sources have 2 main traits - (1) similar content to the primary source(s) and (2)published after the primary sources.Using these traits, it is likely to create a network between the primary and secondary sources, and subsequently deep-dive to understand what are the articles discussing. 
 
+Next, news articles typically contain some form of bias depending on the intent of the articles. Different newsgroup would also focus on different aspect of the story. In this case, I will employ the Latent Dirichlet Allocation (LDA) algorithm to identify key topics. By making sure that every document is a mixture of topics, and every topic is a mixture of words, we can determine if each news article is biased towards. 
+
+
+Finally, the last question requires us to determine the complex relationship between the employees in GAStech. In this scenario, we will use their email correspondences to plot a network graph to show their relationship. We then can deep dive into the email subject headers to understand what kind of correspondence they are involved in. By looking at both information concurretly, we can assume the relationship and objectives between two employees. 
+
 
 # 3. Question 1 Analysis
 
@@ -51,7 +56,7 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk', 'utf8', 'knitr')
+             'visNetwork', 'topicmodels', 'crosstalk', 'utf8', 'knitr','ldatuning', 'topicmodels')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -169,7 +174,7 @@ wide_text_cleaned <- data.frame(wide_text_cleaned)
 
 ```
 
-## 233 Data Preprocessing
+## 3.3 Data Preprocessing
 
 5. In this step, I will categorise the data with trigrams, a function that splits the text column into consecutive words. I have also attempted to remove common stopwords from the trigrams. This variable will be used as the base for other derivations. 
 
@@ -303,6 +308,73 @@ visNetwork(news_cors_node_filtered,
 
 2. From the above figure, "The Explainer_382" is the primary source for "The Abila Post_233" and "Central Bulletin_244" and subsequently used as a source for "News Online Today_489. 
 
+# 4. Question 2 Analysis
+
+In this question, I will make use of Latent Dirichlet Allocation (LDA) to identify topics presented in each newsgroup. I have decided to use LDA as LDA treats each document as a mixture of topics and every topic as a mixture of words. Given the generative statistical nature of LDA, we hope that it will explain why some part of the data are similar. With that, we can extract the bias behind the articles. 
+
+## 4.2 Data Preparation
+
+1. First, I will tokenize the words based on the TEXT column. This is to prepare the data for LDA on the TEXT column to understand the context. 
+
+```{r, echo = FALSE, eval=TRUE}
+
+tidy_source_text <- wide_text_cleaned %>%
+  unnest_tokens(word,TEXT) %>%
+  filter(!word %in% stop_words$word,
+         !word %in% str_remove_all(stop_words$word, "'"),
+         str_detect(word, "[a-z]")) %>%
+  group_by(word) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  filter(count>30)
+```
+
+2. Next, I have divided up the articles based on the different news sources. This will be processed into a document term matrix with cast_dtm. This will be fed into the LDA model for topics analysis. 
+
+```{r, echo = FALSE, eval=TRUE}
+tidy_source_dtm <- tidy_source_text %>%
+  unite(document,SOURCE,newsgroup_id) %>%
+  count(document, word) %>%
+  cast_dtm(document, word, n)
+
+```
+
+3. Now, I am ready to fit the document term matrix into the LDA model. One of the parameter required is the number of topics to be generated. To determine the optimal number of topics, I have used the ldatuning package to tune the optimal number of topics, based on the existing dataset. This package uses 4 metrics to select the number of topics for the LDA model. 
+
+4. From the plot below, the optimal number of topics generated is 8, and I will use this parameter to run the LDA model. The idea behind this method is to find the extremum by minimizing the Arun2010/CaoJuan2009 model and maximising Deveaud2014/Griffiths2004 models. 
+
+```{r, echo = TRUE, eval=TRUE}
+
+result <- FindTopicsNumber(
+  tidy_source_dtm,
+  topics = seq(from = 2, to =15, by =1),
+  metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
+  method = "Gibbs",
+  control = list(seed = 20202),
+  mc.cores = 2L,
+  verbose = TRUE
+  
+)
+
+FindTopicsNumber_plot(result)
+
+```
+```{r, echo = FALSE, eval=TRUE}
+tidy_source_lda <- LDA(tidy_source_dtm, k=8, control=list(seed=2020))
+
+
+tidy_source_lda  %>%
+  tidy() %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 8) %>%
+  ungroup() %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+
+```
 
 
 
@@ -418,7 +490,7 @@ datatable(emails_records_summary, filter='top', options = list(
 
 2. Upon closer inspection, while some of the email subjects might indicate some personal relationship (casino nights, planning for staff picnic), they are in fact events initiated by the company and seemed to be sent to all employees. We will ignore these emails. 
 
-3. Next, an observation from the network analysis showed that 2 staff have the most number of correspondence with the employees. They are namely, Linnea Bergan and Ruscella Mies Haber from the administration team. Upon closer inspection in the email headers, we can conclude that they typically send group emails to the employees with regard to administrative and Information Technology related topics. As such, the information might not be as useful in determining relationships and will be excluded in the analysis below.  
+3. Next, an observation from the network analysis showed that 2 staff have the highest number of correspondence with the employees. They are namely, Linnea Bergan and Ruscella Mies Haber from the administration team and information technology team. Upon closer inspection in the email headers, we can conclude that emails they have sent are group emails  with regard to administrative and Information Technology related topics. As such, it is likely that they are the main point of contact to push generic messages out. 
 
 4. In the next few steps, I will summarise some of the relationships between employees based on the email topics. 
 
@@ -430,9 +502,11 @@ From the network graph, we can tell that Sten has frequent communication between
 
 ![CEO Sten Sanjorge Correspondance with Executive Team](Image/Image 6.PNG)
 
-It seemed that Sten has personal relationships with Ada Campo, Orhan Strum and William Vasco as there were emails going back and forth with regards to an impromptu golf game and seeking for recommendation for a good vacation spot. Ingrid Barranco only spoke to Sten with regard to work events only.
+It seemed that Sten has personal relationships with Ada Campo, Orhan Strum and William Vasco as there were emails going back and forth with regards to an impromptu golf game and seeking for recommendation for a good vacation spot. In addition to the personal relationship, there are also work related emails pertaining to the business. 
 
-Another correspondence is with Henk Mies, a Truck Driver from the Facilities department. Unfortunately, we only have the subject title of the email and is only labelled files. We will assume that this is a work incident that requires CEO's attention. 
+On the other hand, Ingrid Barranco only spoke to Sten with regard to work, and more specifically finance related topics, given her role as the CFO. 
+
+Another interesting correspondence is with Henk Mies, a Truck Driver from the Facilities department. Unfortunately, we only have the subject title of the email and is only labeled "files". However, it is rather strange that this correspondance was bilateral, without involving any other employees. We will assume that this is a work incident that requires CEO's attention. 
 
 ![CEO Sten Sanjorge Correspondance with Henk Mies](Image/Image 6.PNG)
 
@@ -442,7 +516,7 @@ The facilities department seemingly have a close personal relationship with one 
 
 ![Guys Night Out Correspondance](Image/Image 9.PNG)
 
-However, it might interesting to note that Bertrand Ovan, being the Facilities Group Manager, did not any correspondence with other departments.Instead, any cross departmental communications were managed by the other team members. For instance, the preparation for the January 20 VIP meeting was managed primarily by Emile Arpa, a janitor by designation. The instructions were primarily initiated by Emile to other departments. 
+However, it might interesting to note that Bertrand Ovan, being the Facilities Group Manager, did not any correspondence with other departments.Instead, any cross departmental communications were managed by the other team members. For instance, the preparation for the January 20 VIP meeting was managed primarily by Emile Arpa, a janitor by designation. The instructions were primarily initiated by Emile to other departments, including the executive team. Bertrand was kept in the loop of the matters. 
 
 ![January 2020 VIP Meeting Preparation](Image/Image 11.PNG)
 
@@ -451,12 +525,24 @@ Another staff, Benito Hawelon, also has personal correspondace with Felix Resumi
 
 ![Benito Hawelon Network](Image/Image 12.PNG)
 
+5. The above indicates the methodology to retrieve relationships between different employees of GAStech. A similar analysis can be conducted using the the network graph and data table with the email subjects. However, one limitation is that the data given only showcases Subject, and not the detail of the emails. As such, there are generic email titles that I was unable to ascertain the real message, and could only make on a best guess based on the department, subject and possible situation. 
 
 
-# 6. References
+#6. Conclusion
+
+
+# 7. References
 
 [1] UNSW Sydney. (n.d.). Primary and secondary sources. UNSW Sydney Library. https://www.library.unsw.edu.au/study/information-resources/primary-and-secondary-sources#:~:text=Primary%20sources%20provide%20a%20first,they%20can%20share%20new%20information.&amp;text=Secondary%20sources%20involve%20analysis%2C%20synthesis,or%20evaluation%20of%20primary%20sources. 
 
+
+[2] Rajkumar Arun, V. Suresh, C. E. Veni Madhavan, and M. N. Narasimha Murthy. 2010. On finding the natural number of topics with latent dirichlet allocation: Some observations. In Advances in knowledge discovery and data mining, Mohammed J. Zaki, Jeffrey Xu Yu, Balaraman Ravindran and Vikram Pudi (eds.). Springer Berlin Heidelberg, 391–402. http://doi.org/10.1007/978-3-642-13657-3_43
+
+[3] Cao Juan, Xia Tian, Li Jintao, Zhang Yongdong, and Tang Sheng. 2009. A density-based method for adaptive lda model selection. Neurocomputing — 16th European Symposium on Artificial Neural Networks 2008 72, 7–9: 1775–1781. http://doi.org/10.1016/j.neucom.2008.06.011
+
+[4] Romain Deveaud, Éric SanJuan, and Patrice Bellot. 2014. Accurate and effective latent concept modeling for ad hoc information retrieval. Document numérique 17, 1: 61–84. http://doi.org/10.3166/dn.17.1.61-84
+
+[5]Thomas L. Griffiths and Mark Steyvers. 2004. Finding scientific topics. Proceedings of the National Academy of Sciences 101, suppl 1: 5228–5235. http://doi.org/10.1073/pnas.0307752101
 
 
 
