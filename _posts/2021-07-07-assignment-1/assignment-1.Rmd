@@ -56,7 +56,8 @@ packages = c('tidytext','widyr','wordcloud',
              'DT','ggwordcloud','textplot',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
-             'visNetwork', 'topicmodels', 'crosstalk', 'utf8', 'knitr','ldatuning', 'topicmodels')
+             'visNetwork', 'topicmodels', 'crosstalk', 'utf8', 'knitr','ldatuning', 'topicmodels',
+             'textmineR')
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -290,7 +291,7 @@ news_cors_node_filtered <- news_cors_node[(news_cors_node$id %in% news_cors_aggr
 ```{r, echo = FALSE, eval=TRUE}
 visNetwork(news_cors_node_filtered,
            news_cors_aggregated_joined_sort_noduplicates_final) %>%
-  visEdges(arrows="to") %>%
+  visEdges(arrows="from") %>%
   visIgraphLayout(layout = "layout_with_fr") %>%
   visOptions(highlightNearest = list(enabled = TRUE),
              nodesIdSelection = TRUE,
@@ -302,11 +303,36 @@ visNetwork(news_cors_node_filtered,
 
 ## 3.4 Analysis
 
-1. From the network plot, we are able to differentiate the primary and the derivative sources. News articles that are closely correlated are linked together. The direction of the arrows will point from the primary source to the derivative source for articles that are closely related. 
+1. From the network plot, we are able to differentiate the primary and the derivative sources. News articles that are closely correlated are linked together. The direction of the arrows will point from the primary source to the derivative source for articles that are closely related. In the case of the small plot below, Kronos Star_569 seemed to be the primary source to Modern Rubicon_827, The Abila Post_834, Worldwise_589 and The Truth_240.
 
-![Figure 1: Classification of Primary and Derivative Source]()
+![Classification of Primary and Derivative Source](Image/image 18.png)
 
-2. From the above figure, "The Explainer_382" is the primary source for "The Abila Post_233" and "Central Bulletin_244" and subsequently used as a source for "News Online Today_489. 
+2. Looking at the overall network grpah, we can identify 4 main clusters based on trigrams correlations in the text. We will look further into the relationships between these clusters. 
+
+![4 main clusters](Image/image 17.png)
+
+__Cluster 1: Homeland Illumination Correlations__
+
+A deeper analysis into the articles for Homeland Illumination indicates that the reports are live updates of the GAStech celebration and the subsequently the fire incident. This resulted in the highly correlated trigrams analysis of the text document. 
+
+__Cluster 2: Kronos Star Correlations__
+
+Another cluster occurs with the Kronos Star. Similar to the clusters for Homeland Illumination, Kronos Star was reporting on the GAStech celevbration, fire incident and kidnapping of GAStech employees. 
+
+However, It is interesting to note that there are 4 external articles that are closely related to the Kronos Star_569 which talks about the unconfirmed reports regarding GAStech executives arriving at the scheduled reception. I will examine the articles and provide a summary.
+
+Modern Rubicon_827: Attendees of the Reception
+The Abila Post_834: Attendees of the Reception
+Worldwise_589: Location of Reception reported before the event
+The Truth_240: Attendees of the Reception
+News Online Today_40: Attendees of the Reception
+
+These articles are reported on 19 January, while the Kronos Star article is reported on 20 April. These articles are closely correlated because of the executive attendees and details of the reception. 
+
+__Cluster 3: Modern Rubicon_159 Cluster__
+
+This cluster focuses on CEO Sten Sanjorge Jr and the situation surrounding the kidnapping. The other remaining news articles focuses on the 
+
 
 # 4. Question 2 Analysis
 
@@ -316,7 +342,7 @@ In this question, I will make use of Latent Dirichlet Allocation (LDA) to identi
 
 1. First, I will tokenize the words based on the TEXT column. This is to prepare the data for LDA on the TEXT column to understand the context. 
 
-```{r, echo = FALSE, eval=TRUE}
+```{r, echo = TRUE, eval=TRUE}
 
 tidy_source_text <- wide_text_cleaned %>%
   unnest_tokens(word,TEXT) %>%
@@ -331,7 +357,7 @@ tidy_source_text <- wide_text_cleaned %>%
 
 2. Next, I have divided up the articles based on the different news sources. This will be processed into a document term matrix with cast_dtm. This will be fed into the LDA model for topics analysis. 
 
-```{r, echo = FALSE, eval=TRUE}
+```{r, echo = TRUE, eval=TRUE}
 tidy_source_dtm <- tidy_source_text %>%
   unite(document,SOURCE,newsgroup_id) %>%
   count(document, word) %>%
@@ -339,9 +365,12 @@ tidy_source_dtm <- tidy_source_text %>%
 
 ```
 
-3. Now, I am ready to fit the document term matrix into the LDA model. One of the parameter required is the number of topics to be generated. To determine the optimal number of topics, I have used the ldatuning package to tune the optimal number of topics, based on the existing dataset. This package uses 4 metrics to select the number of topics for the LDA model. 
 
-4. From the plot below, the optimal number of topics generated is 8, and I will use this parameter to run the LDA model. The idea behind this method is to find the extremum by minimizing the Arun2010/CaoJuan2009 model and maximising Deveaud2014/Griffiths2004 models. 
+## 4.3 Data Preprocessing
+
+1. Now, I am ready to fit the document term matrix into the LDA model. One of the parameter required is the number of topics to be generated. To determine the optimal number of topics, I have used the ldatuning package to tune the optimal number of topics, based on the existing dataset. This package uses 4 metrics to select the number of topics for the LDA model. 
+
+2. From the plot below, the optimal number of topics generated is 8, and I will use this parameter to run the LDA model. The idea behind this method is to find the extremum by minimizing the Arun2010/CaoJuan2009 model and maximising Deveaud2014/Griffiths2004 models. 
 
 ```{r, echo = TRUE, eval=TRUE}
 
@@ -359,14 +388,17 @@ result <- FindTopicsNumber(
 FindTopicsNumber_plot(result)
 
 ```
-```{r, echo = FALSE, eval=TRUE}
-tidy_source_lda <- LDA(tidy_source_dtm, k=8, control=list(seed=2020))
 
+3. Next, I am ready to fit the model into the LDA model with k=8. I will visualise the results with ggplot2, facet plot to show the top-10 words for each topic. 
 
+```{r, echo = TRUE, eval=FALSE}
+tidy_source_lda <- LDA(tidy_source_dtm, k=8, iterations = 500)
+
+set.seed(2020)
 tidy_source_lda  %>%
   tidy() %>%
   group_by(topic) %>%
-  slice_max(beta, n = 8) %>%
+  slice_max(beta, n = 20 ) %>%
   ungroup() %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
@@ -376,10 +408,57 @@ tidy_source_lda  %>%
 
 ```
 
+![LDA Topic Modelling](Image/image 13.PNG)
+
+## 4.4 Analysis
+
+1. Now we are ready to analyse the data. From facet graph generated, I have summarised the plausible topics from the words generated, and categorised them based on the bias. I will do this based on the summary of the words, as well as deep diving into the news articles to better understand the backgroud.
+
+Topic 1: Death of Karel (in jail) and Vann (due to contamination) - People focused
+Topic 2: Celebration of GAStech achievements - People focused
+Topic 3: Complications by designer drugs - People focused
+Topic 4: Death of Health Minister and new appointment - People focused
+Topic 5: Gastech developments over the years - Event focused
+Topic 6: Kidnapping Incident - Event focused
+Topic 7: Demonstration - People focused
+Topic 8: Contamination of water - Event focused
+
+2. Next, I will classify the topics based on the SOURCE, and understand what each source is mainly reporting. I can confirm this by comparing the "gamma" value for each topic. 
+
+```{r, echo = TRUE, eval=FALSE}
+set.seed(2020)
+tidy_source_lda %>%
+  tidy(matrix = "gamma") %>%
+  separate(document, c("SOURCE","newsgroup_id"), sep = "_") %>%
+  mutate(SOURCE = reorder(SOURCE, gamma * topic)) %>%
+  ggplot(aes(factor(topic), gamma)) +
+  geom_boxplot() +
+  facet_wrap(~ SOURCE) +
+  labs(x = "Topic",
+       y = "# of messages where this was the highest % topic")
+
+```
+
+![Understanding the topics from each news source](Image/image 14.PNG)
+
+3. From the above summary chart, I have noticed that there are some news sources that might potentially have overlapping topics. This is normal in LDA modeling. To simplify understanding, I will provide some examples on analysing the news articles based on the bias.
+
+__Kronos Star News Articles__
+
+From the above observation, we can derive that Kronos Star have reported news surrounding the demonstration and effects of the water contamination (Topic 7 and Topic 8). A deeper analysis into the news articles from Kronos Star indicates that Kronos Star was providing live updates on the demonstration events. The reporting was also focused on the role of POKs in the demonstration and suspected kidnapping of GAStech employees. 
+
+Judging from the tone of the articles, there is a slight bias in aganist the POKs in terms of the reporting given that majority of the news are focused on the roles played by the POKs. They were also portrayed rather negatively given that words such as violent, accused and protests are used in the reporting. 
+
+![News Articles from Kronos Star](Image/image 15.PNG)
 
 
+__All News Today News Articles__
+
+On the other hand, we derived that All News Today mainly reported on news surrounding people (Topic 1 and Topic 4). A closer analysis into the news articles indicates that the newsgroup has done articles that includes the activies that have happened to the key characters. In contrary to Kronos Star, the tone of the articles seemed to have a bias for POKs. The articles mainly depicted the support of key POK members. 
 
 # 5. Question 3 Analysis
+
+In this question, I will prepare a network graph to understand the correspondence between different employees based on their emails. To further understand their relationship, we can deep dive by looking at subject headers of the emails and understand the relationship and objectives between different employees. 
 
 ## 5.1 Data Preparation
 

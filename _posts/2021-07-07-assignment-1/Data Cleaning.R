@@ -185,11 +185,11 @@ tidy_source_dtm <- tidy_source_text %>%
 
 tidy_source_lda <- LDA(tidy_source_dtm, k=8, control=list(seed=2020))
 
-
+set.seed(2020)
 tidy_source_lda  %>%
   tidy() %>%
   group_by(topic) %>%
-  slice_max(beta, n = 15) %>%
+  slice_max(beta, n = 20) %>%
   ungroup() %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
@@ -213,7 +213,7 @@ FindTopicsNumber_plot(result)
 
 tidy_source_lda %>%
   tidy(matrix = "gamma") %>%
-  separate(document, c("SOURCE",newsgroup_id), sep = "_") %>%
+  separate(document, c("SOURCE","newsgroup_id"), sep = "_") %>%
   mutate(SOURCE = reorder(SOURCE, gamma * topic)) %>%
   ggplot(aes(factor(topic), gamma)) +
   geom_boxplot() +
