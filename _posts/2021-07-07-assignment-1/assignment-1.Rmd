@@ -24,7 +24,6 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # 1. Introduction
 
-
 For the past 20 years, Tethys-based GAStech has been operating a natural gas production site in the island country of Kronos. They have been largely successful in generating profits and developed strong relationships with the government of Kronos. Unfortunately, their business has not been successful in demonstrating environmental stewardship with the Protectors of Kronos (POK). In January 2014, several employees of GAStech went missing in the midst of a celebration. POK is suspected in the disappearances. 
 
 In this mini-challenge, we are tasked to investigate the relationships and conditions that led up to the kidnapping. I will be answering the following questions:
@@ -42,7 +41,6 @@ By definition, primary sources are first-hand account of an event and typically 
 
 Next, news articles typically contain some form of bias depending on the intent of the articles. Different newsgroup would also focus on different aspect of the story. In this case, I will employ the Latent Dirichlet Allocation (LDA) algorithm to identify key topics. By making sure that every document is a mixture of topics, and every topic is a mixture of words, we can determine if each news article is biased towards. 
 
-
 Finally, the last question requires us to determine the complex relationship between the employees in GAStech. In this scenario, we will use their email correspondences to plot a network graph to show their relationship. We then can deep dive into the email subject headers to understand what kind of correspondence they are involved in. By looking at both information concurretly, we can assume the relationship and objectives between two employees. 
 
 
@@ -57,7 +55,7 @@ packages = c('tidytext','widyr','wordcloud',
              'lubridate', 'hms', 'tidyverse',
              'tidygraph', 'ggraph', 'igraph','stringr','tidyr', 'ggplot2',
              'visNetwork', 'topicmodels', 'crosstalk', 'utf8', 'knitr','ldatuning', 'topicmodels',
-             'textmineR')
+             'textmineR', "tm", "wordcloud")
 
 for (p in packages) {
   if(!require(p, character.only = T)){
@@ -315,24 +313,118 @@ __Cluster 1: Homeland Illumination Correlations__
 
 A deeper analysis into the articles for Homeland Illumination indicates that the reports are live updates of the GAStech celebration and the subsequently the fire incident. This resulted in the highly correlated trigrams analysis of the text document. 
 
+Given that majority of Homeland Illumination occurs in a cluster, I will plot a wordcloud to determine the main idea of the sources. 
+
+``````{r, echo = TRUE, eval=TRUE}
+
+cluster1_cloud <- wide_text_cleaned %>%
+  filter(SOURCE=="Homeland Illumination")
+cluster1_cloud <- Corpus(VectorSource(cluster1_cloud$TEXT))
+  
+cluster1_cloud <- tm_map(cluster1_cloud, removeNumbers)
+cluster1_cloud <- tm_map(cluster1_cloud, removeWords, stopwords("english"))
+cluster1_cloud <- tm_map(cluster1_cloud, removePunctuation)
+cluster1_cloud <- tm_map(cluster1_cloud, stripWhitespace)
+
+dtm_cluster1 <- TermDocumentMatrix(cluster1_cloud)
+m_cluster1 <- as.matrix(dtm_cluster1)
+v_cluster1 <- sort(rowSums(m_cluster1),decreasing=TRUE)
+d_cluster1 <- data.frame(word = names(v_cluster1),freq=v_cluster1)
+
+set.seed(2020)
+wordcloud(words = d_cluster1$word,freq = d_cluster1$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"), scale = c(3,0.2))
+
+```
+
+The wordcloud generated also gives a summary of the events that happened on the day of celebration as well as the fire.
+
 __Cluster 2: Kronos Star Correlations__
 
 Another cluster occurs with the Kronos Star. Similar to the clusters for Homeland Illumination, Kronos Star was reporting on the GAStech celevbration, fire incident and kidnapping of GAStech employees. 
 
 However, It is interesting to note that there are 4 external articles that are closely related to the Kronos Star_569 which talks about the unconfirmed reports regarding GAStech executives arriving at the scheduled reception. I will examine the articles and provide a summary.
 
-Modern Rubicon_827: Attendees of the Reception
-The Abila Post_834: Attendees of the Reception
-Worldwise_589: Location of Reception reported before the event
-The Truth_240: Attendees of the Reception
-News Online Today_40: Attendees of the Reception
+``````{r, echo = TRUE, eval=TRUE}
+
+cluster2_cloud <- wide_text_cleaned %>%
+  filter(newsgroup_id %in% c("Modern Rubicon_827.txt","The Abila Post_834.txt", "Worldwise_589.txt", "The Truth_240.txt","News Online Today_40.txt"))
+
+cluster2_cloud <- Corpus(VectorSource(cluster2_cloud$TEXT))
+  
+cluster2_cloud <- tm_map(cluster2_cloud, removeNumbers)
+cluster2_cloud <- tm_map(cluster2_cloud, removeWords, stopwords("english"))
+cluster2_cloud <- tm_map(cluster2_cloud, removePunctuation)
+cluster2_cloud <- tm_map(cluster2_cloud, stripWhitespace)
+
+dtm_cluster2 <- TermDocumentMatrix(cluster2_cloud)
+m_cluster2 <- as.matrix(dtm_cluster2)
+v_cluster2 <- sort(rowSums(m_cluster2),decreasing=TRUE)
+d_cluster2 <- data.frame(word = names(v_cluster2),freq=v_cluster2)
+
+set.seed(2020)
+wordcloud(words = d_cluster2$word,freq = d_cluster2$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"), scale = c(3,0.2))
+
+```
 
 These articles are reported on 19 January, while the Kronos Star article is reported on 20 April. These articles are closely correlated because of the executive attendees and details of the reception. 
 
-__Cluster 3: Modern Rubicon_159 Cluster__
+__Cluster 3: Modern Rubicon_159 Cluster Correlations__
 
-This cluster focuses on CEO Sten Sanjorge Jr and the situation surrounding the kidnapping. The other remaining news articles focuses on the 
+This cluster focuses on CEO Sten Sanjorge Jr and the situation surrounding the kidnapping.
 
+``````{r, echo = TRUE, eval=TRUE}
+
+cluster3_cloud <- wide_text_cleaned %>%
+  filter(newsgroup_id %in% c("The Wrap_704.txt", "News Online Today_711.txt", "The Abila Post_764.txt", "Tethys News_726.txt", "The Light of Truth_494.txt", "The General Post_192.txt", "The General Post_826.txt", "Kronos Star_481.txt", "News Online Today_65.txt", "News Online Today_344.txt", "Worldwise_591.txt", "News Online Today_40.txt", "Kronos Star_692.txt", "Central Bullentin_618.txt", "Daily Pegasus_602.txt", "The Orb_148.txt", "The Light of Truth_560.txt", "The Abila Post_654.txt", "The Tulip_178.txt", "Modern Rubicon_159.txt", "Centrum Sentinel_597.txt", "Tethys News_122.txt", "New Online Today_344.txt"))
+
+
+cluster3_cloud <- Corpus(VectorSource(cluster3_cloud$TEXT))
+  
+cluster3_cloud <- tm_map(cluster3_cloud, removeNumbers)
+cluster3_cloud <- tm_map(cluster3_cloud, removeWords, stopwords("english"))
+cluster3_cloud <- tm_map(cluster3_cloud, removePunctuation)
+cluster3_cloud <- tm_map(cluster3_cloud, stripWhitespace)
+
+dtm_cluster3 <- TermDocumentMatrix(cluster3_cloud)
+m_cluster3 <- as.matrix(dtm_cluster3)
+v_cluster3 <- sort(rowSums(m_cluster3),decreasing=TRUE)
+d_cluster3 <- data.frame(word = names(v_cluster3),freq=v_cluster3)
+
+set.seed(2020)
+wordcloud(words = d_cluster3$word,freq = d_cluster3$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"), scale = c(3,0.2))
+```
+
+__Cluster 4: The General Post_536 Correlations__
+
+``````{r, echo = TRUE, eval=TRUE}
+
+cluster4_cloud <- wide_text_cleaned %>%
+  filter(newsgroup_id %in% c("The Light of Truth_822.txt", "Modern Rubicon_452.txt", "Centrum Sentinel_624.txt", "News Online Today_219.txt", "The World_824.txt", "Who What News_310.txt", "The Light of Truth_560.txt", "The Orb_148", "The Abila Post_654.txt", "The Tulip_178.txt","Tethys News_122.txt", "The Explainer_667.txt"))
+
+
+cluster4_cloud <- Corpus(VectorSource(cluster4_cloud$TEXT))
+  
+cluster4_cloud <- tm_map(cluster4_cloud, removeNumbers)
+cluster4_cloud <- tm_map(cluster4_cloud, removeWords, stopwords("english"))
+cluster4_cloud <- tm_map(cluster4_cloud, removePunctuation)
+cluster4_cloud <- tm_map(cluster4_cloud, stripWhitespace)
+
+dtm_cluster4 <- TermDocumentMatrix(cluster4_cloud)
+m_cluster4 <- as.matrix(dtm_cluster4)
+v_cluster4 <- sort(rowSums(m_cluster4),decreasing=TRUE)
+d_cluster4 <- data.frame(word = names(v_cluster4),freq=v_cluster4)
+
+set.seed(2020)
+wordcloud(words = d_cluster4$word,freq = d_cluster4$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"), scale = c(3,0.2))
+```
 
 # 4. Question 2 Analysis
 
@@ -607,7 +699,7 @@ Another staff, Benito Hawelon, also has personal correspondace with Felix Resumi
 5. The above indicates the methodology to retrieve relationships between different employees of GAStech. A similar analysis can be conducted using the the network graph and data table with the email subjects. However, one limitation is that the data given only showcases Subject, and not the detail of the emails. As such, there are generic email titles that I was unable to ascertain the real message, and could only make on a best guess based on the department, subject and possible situation. 
 
 
-#6. Conclusion
+# 6. Conclusion
 
 
 # 7. References
